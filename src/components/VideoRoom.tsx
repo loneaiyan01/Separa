@@ -11,7 +11,7 @@ import {
     useRoomContext,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
-import { Track } from 'livekit-client';
+import { Track, RemoteTrackPublication } from 'livekit-client';
 import { Gender, ParticipantMetadata } from '@/types';
 import { Users, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -100,7 +100,7 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
                             shouldSubscribe = false; // males and host cannot see females
                         }
                     }
-                } catch (e) {
+                } catch {
                     shouldSubscribe = true; // Subscribe on parse error
                 }
             }
@@ -108,9 +108,13 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
             // Apply subscription decision
             if (trackRef.publication && 'setSubscribed' in trackRef.publication) {
                 if (shouldSubscribe) {
-                    (trackRef.publication as any).setSubscribed(true);
+                    if (trackRef.publication instanceof RemoteTrackPublication) {
+                        trackRef.publication.setSubscribed(true);
+                    }
                 } else {
-                    (trackRef.publication as any).setSubscribed(false);
+                    if (trackRef.publication instanceof RemoteTrackPublication) {
+                        trackRef.publication.setSubscribed(false);
+                    }
                 }
             }
         });
@@ -132,7 +136,7 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
         let metadata: ParticipantMetadata;
         try {
             metadata = JSON.parse(participant.metadata);
-        } catch (e) {
+        } catch {
             return true;
         }
 
@@ -155,7 +159,7 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
         if (currentMetadata) {
             try {
                 metadata = JSON.parse(currentMetadata);
-            } catch (e) { }
+            } catch { }
         }
 
         const newSpotlightState = !metadata.isSpotlighted;
@@ -208,7 +212,7 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
                         if (participant.metadata) {
                             try {
                                 metadata = JSON.parse(participant.metadata);
-                            } catch (e) { }
+                            } catch { }
                         }
 
                         return (

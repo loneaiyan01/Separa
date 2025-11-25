@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         if (participant.metadata) {
             try {
                 metadata = JSON.parse(participant.metadata);
-            } catch (e) {
+            } catch {
                 // ignore
             }
         }
