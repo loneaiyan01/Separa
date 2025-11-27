@@ -1,0 +1,74 @@
+[
+  {
+    "id": "33c7c7fd52471379",
+    "name": "Muneeb Baya",
+    "description": "Weekly Classes",
+    "template": "brothers-only",
+    "locked": true,
+    "password": "cd838f8fc2af70fc323a9d026c34b566b83086b315c781d71bab1023f9f2f8d2",
+    "creator": "anonymous",
+    "createdAt": "2025-11-27T10:15:28.844Z",
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    }
+  },
+  {
+    "id": "03e17f741a66b7d5",
+    "name": "Test Brothers Room",
+    "description": "",
+    "template": "brothers-only",
+    "locked": true,
+    "password": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+    "creator": "anonymous",
+    "createdAt": "2025-11-27T10:18:18.539Z",
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    }
+  },
+  {
+    "id": "a105c30396f87439",
+    "name": "Sisters Study Group",
+    "description": "",
+    "template": "sisters-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": "2025-11-27T10:19:35.536Z",
+    "settings": {
+      "allowedGenders": [
+        "female",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    }
+  },
+  {
+    "id": "d84456539c4cb9d5",
+    "name": "Community Meeting",
+    "description": "",
+    "template": "mixed-host-required",
+    "locked": true,
+    "password": "d8593183c1947107653e609e2c6341ffdab896794ea72475dc06558f67cf10fd",
+    "creator": "anonymous",
+    "createdAt": "2025-11-27T10:19:59.432Z",
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": true,
+      "maxParticipants": null
+    }
+  }
+]
