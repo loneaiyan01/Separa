@@ -29,7 +29,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [step, setStep] = useState<WorkflowStep>(roomId ? 2 : 1);
     const [enteredRoomID, setEnteredRoomID] = useState<string>("");
     const [displayName, setDisplayName] = useState("");
-    
+
     // Role/password state
     const [roleStep, setRoleStep] = useState<RoleStep | null>(null);
     const [hostPassword, setHostPassword] = useState("");
@@ -39,7 +39,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [error, setError] = useState("");
     const [roomInfo, setRoomInfo] = useState<{ locked: boolean; name: string } | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [roomHistory, setRoomHistory] = useState<Array<{id: string; name: string; lastJoined: string}>>([]);
+    const [roomHistory, setRoomHistory] = useState<Array<{ id: string; name: string; lastJoined: string }>>([]);
 
     // Load room info and stored password when component mounts with roomId
     useEffect(() => {
@@ -47,13 +47,13 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             if (roomId) {
                 // If roomId exists, skip to Step 2
                 setStep(2);
-                
+
                 try {
                     const res = await fetch(`/api/rooms/${roomId}`);
                     if (res.ok) {
                         const room = await res.json();
                         setRoomInfo({ locked: room.locked, name: room.name });
-                        
+
                         // Check for stored password from RoomCard
                         const storedPassword = sessionStorage.getItem(`room_${roomId}_password`);
                         if (storedPassword) {
@@ -66,9 +66,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 }
             }
         };
-        
+
         fetchRoomInfo();
-        
+
         // Load room history from localStorage
         const loadRoomHistory = () => {
             try {
@@ -81,7 +81,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 console.error('Error loading room history:', error);
             }
         };
-        
+
         loadRoomHistory();
     }, [roomId]);
 
@@ -89,17 +89,17 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const handleContinueToStep2 = async () => {
         setError("");
         setIsLoading(true);
-        
+
         if (!enteredRoomID.trim()) {
             setError("Please enter a Room ID.");
             setIsLoading(false);
             return;
         }
-        
+
         // Validate that the room exists
         try {
             const res = await fetch(`/api/rooms/${enteredRoomID.trim()}`);
-            
+
             if (!res.ok) {
                 if (res.status === 404) {
                     setError("Room not found. Please check the Room ID and try again.");
@@ -109,18 +109,18 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 setIsLoading(false);
                 return;
             }
-            
+
             // Get room info to check if locked
             const room = await res.json();
             setRoomInfo({ locked: room.locked, name: room.name });
-            
+
             // Check if there's a stored password from RoomCard
             const storedPassword = sessionStorage.getItem(`room_${enteredRoomID.trim()}_password`);
             if (storedPassword) {
                 setRoomPassword(storedPassword);
                 sessionStorage.removeItem(`room_${enteredRoomID.trim()}_password`);
             }
-            
+
             // Room exists, proceed to step 2
             setStep(2);
             setIsLoading(false);
@@ -146,20 +146,20 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         try {
             const history = localStorage.getItem('room_history');
             let rooms = history ? JSON.parse(history) : [];
-            
+
             // Remove existing entry if present
             rooms = rooms.filter((r: any) => r.id !== roomId);
-            
+
             // Add to beginning
             rooms.unshift({
                 id: roomId,
                 name: roomName,
                 lastJoined: new Date().toISOString()
             });
-            
+
             // Keep only last 10 rooms
             rooms = rooms.slice(0, 10);
-            
+
             localStorage.setItem('room_history', JSON.stringify(rooms));
         } catch (error) {
             console.error('Error saving to history:', error);
@@ -176,7 +176,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         }
 
         const actualRoomId = roomId || enteredRoomID;
-        
+
         // Save to history before joining
         if (actualRoomId) {
             saveToHistory(actualRoomId, roomInfo?.name || 'Unknown Room');
@@ -274,10 +274,10 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             }
 
             const room = await res.json();
-            
+
             // Save to history
             saveToHistory(room.id, room.name);
-            
+
             // Redirect to the new room
             window.location.href = `/?room=${room.id}`;
         } catch (error) {
@@ -293,143 +293,245 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     return (
         <>
             {/* Create Room Modal */}
-            <CreateRoomModal 
+            <CreateRoomModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 onCreateRoom={handleCreateRoom}
             />
-            
+
             <div className="flex items-center justify-center min-h-screen p-4 md:p-6 gradient-bg">
-                <Card className="w-full max-w-md glass-strong border-0 shadow-2xl p-6 md:p-10 animate-scale-in">
-                <CardHeader className="text-center space-y-2 pb-6 px-0">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/30 to-emerald-600/30 rounded-2xl flex items-center justify-center mb-3 pulse-glow">
-                        <ShieldCheck className="w-10 h-10 text-primary" />
-                    </div>
-                    <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                        Separa
-                    </CardTitle>
-                    <CardDescription className="text-slate-300 text-base">
-                        {step === 1 ? (
-                            "Secure, gender‑segregated video conferencing."
-                        ) : (
-                            <span>Joining: <strong className="text-primary">{displayRoomName || displayRoomID}</strong></span>
-                        )}
-                    </CardDescription>
-                </CardHeader>
-
-                <CardContent className="space-y-5 px-0">
-                    {/* Error Display */}
-                    {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
-                            {error}
+                <Card className="w-full max-w-md glass-strong frosted-edge border-0 shadow-2xl p-6 md:p-10 animate-scale-in">
+                    <CardHeader className="text-center space-y-2 pb-6 px-0">
+                        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/30 to-emerald-600/30 rounded-2xl flex items-center justify-center mb-3 pulse-glow">
+                            <ShieldCheck className="w-10 h-10 text-primary" />
                         </div>
-                    )}
+                        <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                            Separa
+                        </CardTitle>
+                        <CardDescription className="text-slate-300 text-base">
+                            {step === 1 ? (
+                                "Secure, gender‑segregated video conferencing."
+                            ) : (
+                                <span>Joining: <strong className="text-primary">{displayRoomName || displayRoomID}</strong></span>
+                            )}
+                        </CardDescription>
+                    </CardHeader>
 
-                    {/* STEP 1: Room Entry */}
-                    {step === 1 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <div className="space-y-2">
-                                <label htmlFor="roomId" className="text-sm font-medium text-slate-300">
-                                    Enter Room ID
-                                </label>
-                                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
-                                    <Lock className="h-5 w-5 text-slate-400" />
-                                    <Input
-                                        id="roomId"
-                                        placeholder="Enter room code"
-                                        value={enteredRoomID}
-                                        onChange={(e) => setEnteredRoomID(e.target.value)}
-                                        className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
-                                        autoFocus
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                handleContinueToStep2();
-                                            }
-                                        }}
-                                    />
+                    <CardContent className="space-y-5 px-0">
+                        {/* Error Display */}
+                        {error && (
+                            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* STEP 1: Room Entry */}
+                        {step === 1 && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                <div className="space-y-2">
+                                    <label htmlFor="roomId" className="text-sm font-medium text-slate-300">
+                                        Enter Room ID
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10" />
+                                        <Input
+                                            id="roomId"
+                                            placeholder="Enter room code"
+                                            value={enteredRoomID}
+                                            onChange={(e) => setEnteredRoomID(e.target.value)}
+                                            className="glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg"
+                                            autoFocus
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleContinueToStep2();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <Button
+                                    onClick={handleContinueToStep2}
+                                    className="glass-button premium-glow w-full h-12 md:h-14 text-white font-semibold transition-all hover:scale-[1.02] active:micro-bounce"
+                                    disabled={!enteredRoomID.trim() || isLoading}
+                                >
+                                    {isLoading ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                            Validating...
+                                        </span>
+                                    ) : 'Continue'}
+                                </Button>
+
+                                {/* Create Room Button - Glass effect like history items */}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="glass-card w-full h-12 md:h-14 px-4 rounded-lg border-2 border-emerald-500/50 hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 transition-all hover:scale-[1.02] active:micro-bounce premium-glow flex items-center justify-center gap-2 font-semibold"
+                                >
+                                    <Plus className="h-5 w-5" />
+                                    Create New Room
+                                </button>
+
+                                {/* History Section */}
+                                <div className="pt-2 border-t border-slate-700/50">
+                                    <Button
+                                        type="button"
+                                        onClick={() => window.location.href = '/rooms'}
+                                        variant="ghost"
+                                        className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+                                    >
+                                        <History className="mr-2 h-4 w-4" />
+                                        History
+                                    </Button>
+
+                                    {/* Show recent rooms if available */}
+                                    {roomHistory.length > 0 && (
+                                        <div className="mt-3 space-y-2">
+                                            <p className="text-xs text-slate-500 px-2">Recently Joined:</p>
+                                            {roomHistory.map((room, index) => (
+                                                <button
+                                                    key={room.id}
+                                                    onClick={async () => {
+                                                        setEnteredRoomID(room.id);
+                                                        // Small delay to ensure state is updated
+                                                        setTimeout(() => {
+                                                            handleContinueToStep2();
+                                                        }, 100);
+                                                    }}
+                                                    className="glass-subtle w-full text-left px-3 py-2 rounded-lg transition-all hover:scale-[1.01] border border-slate-700/30 hover:border-emerald-500/30 group animate-slide-up"
+                                                    style={{ animationDelay: `${index * 0.05}s` }}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm text-white font-medium truncate group-hover:text-emerald-400 transition-colors">
+                                                                {room.name}
+                                                            </p>
+                                                            <p className="text-xs text-slate-500 truncate">
+                                                                {room.id}
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-xs text-slate-600 ml-2">
+                                                            {new Date(room.lastJoined).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                        )}
 
-                            <Button
-                                onClick={handleContinueToStep2}
-                                className="w-full h-12 md:h-14 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-primary/50"
-                                disabled={!enteredRoomID.trim() || isLoading}
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                        Validating...
-                                    </span>
-                                ) : 'Continue'}
-                            </Button>
-
-                            {/* Create Room Button - Glass effect like history items */}
-                            <button
-                                type="button"
-                                onClick={() => setShowCreateModal(true)}
-                                className="w-full h-12 md:h-14 px-4 rounded-md bg-emerald-600/20 hover:bg-emerald-600/30 border-2 border-emerald-500/50 hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 transition-all hover:scale-[1.02] shadow-lg hover:shadow-emerald-500/20 backdrop-blur-sm flex items-center justify-center gap-2 font-semibold"
-                            >
-                                <Plus className="h-5 w-5" />
-                                Create New Room
-                            </button>
-
-                            {/* History Section */}
-                            <div className="pt-2 border-t border-slate-700/50">
-                                <Button
-                                    type="button"
-                                    onClick={() => window.location.href = '/rooms'}
-                                    variant="ghost"
-                                    className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
-                                >
-                                    <History className="mr-2 h-4 w-4" />
-                                    History
-                                </Button>
-                                
-                                {/* Show recent rooms if available */}
-                                {roomHistory.length > 0 && (
-                                    <div className="mt-3 space-y-2">
-                                        <p className="text-xs text-slate-500 px-2">Recently Joined:</p>
-                                        {roomHistory.map((room) => (
-                                            <button
-                                                key={room.id}
-                                                onClick={async () => {
-                                                    setEnteredRoomID(room.id);
-                                                    // Small delay to ensure state is updated
-                                                    setTimeout(() => {
-                                                        handleContinueToStep2();
-                                                    }, 100);
-                                                }}
-                                                className="w-full text-left px-3 py-2 rounded-md bg-slate-800/30 hover:bg-slate-700/50 transition-colors border border-slate-700/30 group"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm text-white font-medium truncate group-hover:text-primary transition-colors">
-                                                            {room.name}
-                                                        </p>
-                                                        <p className="text-xs text-slate-500 truncate">
-                                                            {room.id}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-xs text-slate-600 ml-2">
-                                                        {new Date(room.lastJoined).toLocaleDateString()}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
+                        {/* STEP 2: Identity & Role Selection (No password prompt yet) */}
+                        {step === 2 && roleStep === null && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                                {/* Back Button - Only show if we came from Step 1 (no roomId prop) */}
+                                {!roomId && (
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Button
+                                            onClick={handleBackToStep1}
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-slate-400 hover:text-white -ml-2"
+                                        >
+                                            <ArrowLeft className="w-4 h-4 mr-1" />
+                                            Back
+                                        </Button>
                                     </div>
                                 )}
-                            </div>
-                        </div>
-                    )}
 
-                    {/* STEP 2: Identity & Role Selection (No password prompt yet) */}
-                    {step === 2 && roleStep === null && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            {/* Back Button - Only show if we came from Step 1 (no roomId prop) */}
-                            {!roomId && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label htmlFor="displayName" className="text-sm font-medium text-slate-300">
+                                            Display Name
+                                        </label>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10" />
+                                            <Input
+                                                id="displayName"
+                                                placeholder="Enter your name"
+                                                value={displayName}
+                                                onChange={(e) => setDisplayName(e.target.value)}
+                                                className="glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg"
+                                                autoFocus
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Room Password (if room requires it) */}
+                                    {(roomId || enteredRoomID) && (
+                                        <div className="space-y-2">
+                                            <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                                                Room Password
+                                                {roomInfo?.locked && <span className="text-xs text-red-400 font-bold">(Required)</span>}
+                                                {!roomInfo?.locked && <span className="text-xs text-slate-500">(if required)</span>}
+                                            </label>
+                                            <div className="relative">
+                                                <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 z-10 ${roomInfo?.locked ? 'text-amber-400' : 'text-slate-400'}`} />
+                                                <Input
+                                                    id="roomPassword"
+                                                    type="password"
+                                                    placeholder={roomInfo?.locked ? "Enter room password (required)" : "Enter room password"}
+                                                    value={roomPassword}
+                                                    onChange={(e) => setRoomPassword(e.target.value)}
+                                                    className={`glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg ${roomInfo?.locked ? 'border-amber-500/50' : ''}`}
+                                                    required={roomInfo?.locked}
+                                                />
+                                            </div>
+                                            {roomInfo?.locked && !roomPassword && (
+                                                <p className="text-xs text-amber-400">This room is locked and requires a password</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-sm font-medium text-slate-300">Select Your Role</label>
+                                    <div className="flex flex-col gap-3">
+                                        <Button
+                                            onClick={() => handleRoleSelect("brother")}
+                                            className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold transition-all hover:scale-[1.02] active:micro-bounce shadow-lg hover:shadow-emerald-500/30 animate-slide-up"
+                                            style={{ animationDelay: '0.05s' }}
+                                            disabled={!displayName.trim()}
+                                        >
+                                            <User className="mr-2 h-5 w-5" />
+                                            Join as Brother
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => handleRoleSelect("sister")}
+                                            className="w-full h-12 md:h-14 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-semibold transition-all hover:scale-[1.02] active:micro-bounce shadow-lg hover:shadow-rose-500/30 relative animate-slide-up"
+                                            style={{ animationDelay: '0.1s' }}
+                                            disabled={!displayName.trim()}
+                                        >
+                                            <User className="mr-2 h-5 w-5" />
+                                            Join as Sister
+                                            <Lock className="absolute right-4 h-4 w-4 opacity-60" />
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => handleRoleSelect("host")}
+                                            variant="outline"
+                                            className="glass-card w-full h-12 md:h-14 border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500 hover:text-amber-300 font-semibold transition-all hover:scale-[1.02] active:micro-bounce shadow-lg hover:shadow-amber-500/20 relative animate-slide-up"
+                                            style={{ animationDelay: '0.15s' }}
+                                            disabled={!displayName.trim()}
+                                        >
+                                            <Crown className="mr-2 h-5 w-5" />
+                                            Join as Host (Admin)
+                                            <Lock className="absolute right-4 h-4 w-4 opacity-60" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Password Entry (Sister or Host) */}
+                        {(roleStep === 'sister-password' || roleStep === 'host-password') && (
+                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Button
-                                        onClick={handleBackToStep1}
+                                        onClick={handleBackToRoleSelection}
                                         variant="ghost"
                                         size="sm"
                                         className="text-slate-400 hover:text-white -ml-2"
@@ -438,162 +540,64 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                         Back
                                     </Button>
                                 </div>
-                            )}
 
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label htmlFor="displayName" className="text-sm font-medium text-slate-300">
-                                        Display Name
-                                    </label>
-                                    <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
-                                        <User className="h-5 w-5 text-slate-400" />
+                                {/* Role indicator card */}
+                                <div className={`p-3 rounded-lg border ${roleStep === 'host-password'
+                                    ? 'bg-amber-500/10 border-amber-500/30'
+                                    : 'bg-rose-500/10 border-rose-500/30'
+                                    }`}>
+                                    <p className="text-sm text-slate-300">
+                                        Joining as <strong className="text-white">{displayName}</strong> • <strong className={roleStep === 'host-password' ? 'text-amber-400' : 'text-rose-400'}>
+                                            {roleStep === 'host-password' ? 'Host' : 'Sister'}
+                                        </strong>
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handlePasswordSubmit} className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label htmlFor="rolePassword" className="text-sm font-medium text-slate-300">
+                                            {roleStep === 'host-password' ? 'Host Password' : 'Sister Password'}
+                                        </label>
+                                    </div>
+
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10" />
                                         <Input
-                                            id="displayName"
-                                            placeholder="Enter your name"
-                                            value={displayName}
-                                            onChange={(e) => setDisplayName(e.target.value)}
-                                            className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
+                                            id="rolePassword"
+                                            type="password"
+                                            placeholder={`Enter ${roleStep === 'host-password' ? 'host' : 'sister'} password`}
+                                            value={roleStep === 'host-password' ? hostPassword : sisterPassword}
+                                            onChange={(e) => roleStep === 'host-password' ? setHostPassword(e.target.value) : setSisterPassword(e.target.value)}
+                                            className="glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg"
                                             autoFocus
                                         />
                                     </div>
-                                </div>
-
-                                {/* Room Password (if room requires it) */}
-                                {(roomId || enteredRoomID) && (
-                                    <div className="space-y-2">
-                                        <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                            Room Password
-                                            {roomInfo?.locked && <span className="text-xs text-red-400 font-bold">(Required)</span>}
-                                            {!roomInfo?.locked && <span className="text-xs text-slate-500">(if required)</span>}
-                                        </label>
-                                        <div className={`flex items-center gap-2 bg-slate-800/50 border rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary ${roomInfo?.locked ? 'border-amber-500/50' : 'border-slate-700'}`}>
-                                            <Lock className={`h-5 w-5 ${roomInfo?.locked ? 'text-amber-400' : 'text-slate-400'}`} />
-                                            <Input
-                                                id="roomPassword"
-                                                type="password"
-                                                placeholder={roomInfo?.locked ? "Enter room password (required)" : "Enter room password"}
-                                                value={roomPassword}
-                                                onChange={(e) => setRoomPassword(e.target.value)}
-                                                className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
-                                                required={roomInfo?.locked}
-                                            />
-                                        </div>
-                                        {roomInfo?.locked && !roomPassword && (
-                                            <p className="text-xs text-amber-400">This room is locked and requires a password</p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-slate-300">Select Your Role</label>
-                                <div className="flex flex-col gap-3">
-                                    <Button
-                                        onClick={() => handleRoleSelect("brother")}
-                                        className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-emerald-500/30"
-                                        disabled={!displayName.trim()}
-                                    >
-                                        <User className="mr-2 h-5 w-5" />
-                                        Join as Brother
-                                    </Button>
 
                                     <Button
-                                        onClick={() => handleRoleSelect("sister")}
-                                        className="w-full h-12 md:h-14 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-rose-500/30 relative"
-                                        disabled={!displayName.trim()}
-                                    >
-                                        <User className="mr-2 h-5 w-5" />
-                                        Join as Sister
-                                        <Lock className="absolute right-4 h-4 w-4 opacity-60" />
-                                    </Button>
-
-                                    <Button
-                                        onClick={() => handleRoleSelect("host")}
-                                        variant="outline"
-                                        className="w-full h-12 md:h-14 border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500 hover:text-amber-300 font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-amber-500/20 relative"
-                                        disabled={!displayName.trim()}
-                                    >
-                                        <Crown className="mr-2 h-5 w-5" />
-                                        Join as Host (Admin)
-                                        <Lock className="absolute right-4 h-4 w-4 opacity-60" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Password Entry (Sister or Host) */}
-                    {(roleStep === 'sister-password' || roleStep === 'host-password') && (
-                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Button
-                                    onClick={handleBackToRoleSelection}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-slate-400 hover:text-white -ml-2"
-                                >
-                                    <ArrowLeft className="w-4 h-4 mr-1" />
-                                    Back
-                                </Button>
-                            </div>
-
-                            {/* Role indicator card */}
-                            <div className={`p-3 rounded-lg border ${roleStep === 'host-password'
-                                    ? 'bg-amber-500/10 border-amber-500/30'
-                                    : 'bg-rose-500/10 border-rose-500/30'
-                                }`}>
-                                <p className="text-sm text-slate-300">
-                                    Joining as <strong className="text-white">{displayName}</strong> • <strong className={roleStep === 'host-password' ? 'text-amber-400' : 'text-rose-400'}>
-                                        {roleStep === 'host-password' ? 'Host' : 'Sister'}
-                                    </strong>
-                                </p>
-                            </div>
-
-                            <form onSubmit={handlePasswordSubmit} className="space-y-5">
-                                <div className="space-y-2">
-                                    <label htmlFor="rolePassword" className="text-sm font-medium text-slate-300">
-                                        {roleStep === 'host-password' ? 'Host Password' : 'Sister Password'}
-                                    </label>
-                                </div>
-
-                                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
-                                    <Lock className="h-5 w-5 text-slate-400" />
-                                    <Input
-                                        id="rolePassword"
-                                        type="password"
-                                        placeholder={`Enter ${roleStep === 'host-password' ? 'host' : 'sister'} password`}
-                                        value={roleStep === 'host-password' ? hostPassword : sisterPassword}
-                                        onChange={(e) => roleStep === 'host-password' ? setHostPassword(e.target.value) : setSisterPassword(e.target.value)}
-                                        className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
-                                        autoFocus
-                                    />
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className={`w-full h-12 text-white transition-all shadow-md ${roleStep === 'host-password'
+                                        type="submit"
+                                        className={`w-full h-12 text-white transition-all shadow-md ${roleStep === 'host-password'
                                             ? 'bg-amber-600 hover:bg-amber-700'
                                             : 'bg-rose-600 hover:bg-rose-700'
-                                        }`}
-                                    disabled={isLoading || (roleStep === 'host-password' ? !hostPassword : !sisterPassword)}
-                                >
-                                    {roleStep === 'host-password' ? <Crown className="mr-2 h-5 w-5" /> : <User className="mr-2 h-5 w-5" />}
-                                    {isLoading ? 'Joining...' : `Join as ${roleStep === 'host-password' ? 'Host' : 'Sister'}`}
-                                </Button>
-                            </form>
-                        </div>
-                    )}
+                                            }`}
+                                        disabled={isLoading || (roleStep === 'host-password' ? !hostPassword : !sisterPassword)}
+                                    >
+                                        {roleStep === 'host-password' ? <Crown className="mr-2 h-5 w-5" /> : <User className="mr-2 h-5 w-5" />}
+                                        {isLoading ? 'Joining...' : `Join as ${roleStep === 'host-password' ? 'Host' : 'Sister'}`}
+                                    </Button>
+                                </form>
+                            </div>
+                        )}
 
-                    {/* Loading State for Brother Joining */}
-                    {roleStep === 'brother-joining' && (
-                        <div className="flex flex-col items-center justify-center py-10 space-y-4 animate-in fade-in duration-300">
-                            <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-                            <p className="text-emerald-400 font-medium">Joining as Brother...</p>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                        {/* Loading State for Brother Joining */}
+                        {roleStep === 'brother-joining' && (
+                            <div className="flex flex-col items-center justify-center py-10 space-y-4 animate-in fade-in duration-300">
+                                <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+                                <p className="text-emerald-400 font-medium">Joining as Brother...</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </>
     );
 }

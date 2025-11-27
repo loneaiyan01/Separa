@@ -91,8 +91,8 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <Card className="w-full max-w-lg glass border-slate-700 shadow-2xl">
+        <div className="glass-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <Card className="w-full max-w-lg glass-strong frosted-edge border-0 shadow-2xl animate-scale-in">
                 <CardHeader className="relative">
                     <Button
                         onClick={onClose}
@@ -130,7 +130,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                                     setError('');
                                 }}
                                 placeholder="e.g., Weekly Study Circle"
-                                className="bg-slate-800/50 border-slate-700 text-white"
+                                className="glass-input h-11 text-white placeholder:text-slate-500"
                                 required
                             />
                         </div>
@@ -144,7 +144,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Brief description of the room"
-                                className="bg-slate-800/50 border-slate-700 text-white"
+                                className="glass-input h-11 text-white placeholder:text-slate-500"
                             />
                         </div>
 
@@ -157,9 +157,9 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                                 {Object.entries(ROOM_TEMPLATES).map(([key, config]) => (
                                     <label
                                         key={key}
-                                        className={`flex flex-col p-4 rounded-lg border-2 cursor-pointer transition-all ${template === key
-                                            ? 'border-primary bg-primary/10'
-                                            : 'border-slate-700 bg-slate-800/30 hover:border-slate-600'
+                                        className={`glass-card flex flex-col p-4 rounded-lg border-2 cursor-pointer transition-all hover:scale-[1.02] ${template === key
+                                            ? 'border-primary bg-primary/10 premium-glow'
+                                            : 'border-slate-700/50 hover:border-emerald-500/30'
                                             }`}
                                     >
                                         <input
@@ -206,7 +206,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter room password"
-                                        className="bg-slate-800/50 border-slate-700 text-white"
+                                        className="glass-input h-11 text-white placeholder:text-slate-500"
                                         required={locked}
                                     />
                                 </div>
@@ -237,7 +237,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                                             value={sessionPassword}
                                             onChange={(e) => setSessionPassword(e.target.value)}
                                             placeholder="Enter session password"
-                                            className="bg-slate-800/50 border-slate-700 text-white"
+                                            className="glass-input h-11 text-white placeholder:text-slate-500"
                                         />
                                     </div>
                                 </div>
@@ -257,7 +257,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white"
+                                className="glass-button premium-glow flex-1 h-11 text-white font-semibold active:micro-bounce"
                                 disabled={loading}
                             >
                                 {loading ? 'Creating...' : 'Create Room'}
