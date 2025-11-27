@@ -19,48 +19,72 @@ interface LobbySelectionProps {
     roomName?: string;
 }
 
-type Step = 'initial' | 'brother-joining' | 'sister-password' | 'host-password';
+type WorkflowStep = 1 | 2;
+type RoleStep = 'brother-joining' | 'sister-password' | 'host-password';
 
 export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelectionProps) {
-    const [step, setStep] = useState<Step>('initial');
-    const [name, setName] = useState("");
+    // 2-step workflow state
+    const [step, setStep] = useState<WorkflowStep>(1);
+    const [enteredRoomID, setEnteredRoomID] = useState<string>("");
+    const [displayName, setDisplayName] = useState("");
+    
+    // Role/password state
+    const [roleStep, setRoleStep] = useState<RoleStep | null>(null);
     const [hostPassword, setHostPassword] = useState("");
     const [sisterPassword, setSisterPassword] = useState("");
     const [roomPassword, setRoomPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleNameSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // This is just to handle Enter key on the name input
-        // The actual transition happens on role selection
+    // Step 1: Validate and proceed to step 2
+    const handleContinueToStep2 = () => {
+        setError("");
+        
+        if (!enteredRoomID.trim()) {
+            setError("Please enter a Room ID.");
+            return;
+        }
+        
+        setStep(2);
     };
 
+    // Step 2: Go back to step 1
+    const handleBackToStep1 = () => {
+        setError("");
+        setStep(1);
+        setRoleStep(null);
+        setHostPassword("");
+        setSisterPassword("");
+        setIsLoading(false);
+    };
+
+    // Step 2: Handle role selection
     const handleRoleSelect = async (role: 'brother' | 'sister' | 'host') => {
         setError("");
 
-        if (!name.trim()) {
-            setError("Please enter your name first.");
+        if (!displayName.trim()) {
+            setError("Please enter your display name first.");
             return;
         }
 
         if (role === 'brother') {
-            setStep('brother-joining');
+            setRoleStep('brother-joining');
             setIsLoading(true);
             try {
-                onJoin(name, 'male', false, roomPassword || undefined);
+                onJoin(displayName, 'male', false, roomPassword || undefined);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
-                setStep('initial');
+                setRoleStep(null);
             }
         } else if (role === 'sister') {
-            setStep('sister-password');
+            setRoleStep('sister-password');
         } else if (role === 'host') {
-            setStep('host-password');
+            setRoleStep('host-password');
         }
     };
 
+    // Handle password submission for Sister/Host
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -70,26 +94,26 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         const hostPwd = process.env.NEXT_PUBLIC_HOST_PASSWORD;
         const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD;
 
-        if (step === 'host-password') {
+        if (roleStep === 'host-password') {
             if (hostPassword !== hostPwd) {
                 setError("Incorrect host password. Please try again.");
                 setIsLoading(false);
                 return;
             }
             try {
-                onJoin(name, 'host', true, roomPassword || undefined);
+                onJoin(displayName, 'host', true, roomPassword || undefined);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
             }
-        } else if (step === 'sister-password') {
+        } else if (roleStep === 'sister-password') {
             if (sisterPassword !== sisterPwd) {
                 setError("Incorrect sister password. Please try again.");
                 setIsLoading(false);
                 return;
             }
             try {
-                onJoin(name, 'female', false, roomPassword || undefined);
+                onJoin(displayName, 'female', false, roomPassword || undefined);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
@@ -97,13 +121,18 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         }
     };
 
-    const handleBack = () => {
+    // Back from password screen to role selection
+    const handleBackToRoleSelection = () => {
         setError("");
-        setStep('initial');
+        setRoleStep(null);
         setHostPassword("");
         setSisterPassword("");
         setIsLoading(false);
     };
+
+    // Determine the room ID to display (from URL param or user input)
+    const displayRoomID = roomId || enteredRoomID;
+    const displayRoomName = roomName;
 
     return (
         <div className="flex items-center justify-center min-h-screen p-4 md:p-6">
@@ -114,10 +143,10 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                     </div>
                     <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight text-white">Separa</CardTitle>
                     <CardDescription className="text-slate-300">
-                        {roomName ? (
-                            <span>Joining: <strong>{roomName}</strong></span>
-                        ) : (
+                        {step === 1 ? (
                             "Secure, gender‑segregated video conferencing."
+                        ) : (
+                            <span>Joining: <strong>{displayRoomName || displayRoomID}</strong></span>
                         )}
                     </CardDescription>
                 </CardHeader>
@@ -130,31 +159,97 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                         </div>
                     )}
 
-                    {/* Step 1: Initial (Name & Role Selection) */}
-                    {step === 'initial' && (
+                    {/* STEP 1: Room Entry */}
+                    {step === 1 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="space-y-2">
+                                <label htmlFor="roomId" className="text-sm font-medium text-slate-300">
+                                    Enter Room ID
+                                </label>
+                                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
+                                    <Lock className="h-5 w-5 text-slate-400" />
+                                    <Input
+                                        id="roomId"
+                                        placeholder="Enter room code"
+                                        value={enteredRoomID}
+                                        onChange={(e) => setEnteredRoomID(e.target.value)}
+                                        className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleContinueToStep2();
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={handleContinueToStep2}
+                                className="w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-white transition-all hover:scale-[1.02] shadow-md"
+                                disabled={!enteredRoomID.trim()}
+                            >
+                                Continue
+                            </Button>
+
+                            {/* Browse Rooms Footer */}
+                            <div className="pt-2 border-t border-slate-700/50">
+                                <Button
+                                    type="button"
+                                    onClick={() => window.location.href = '/rooms'}
+                                    variant="ghost"
+                                    className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+                                >
+                                    Browse Existing Rooms
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 2: Identity & Role Selection (No password prompt yet) */}
+                    {step === 2 && roleStep === null && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            {/* Back Button */}
+                            <div className="flex items-center gap-2 mb-2">
+                                <Button
+                                    onClick={handleBackToStep1}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-slate-400 hover:text-white -ml-2"
+                                >
+                                    <ArrowLeft className="w-4 h-4 mr-1" />
+                                    Back
+                                </Button>
+                            </div>
+
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-300">Display Name</label>
+                                    <label htmlFor="displayName" className="text-sm font-medium text-slate-300">
+                                        Display Name
+                                    </label>
                                     <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
                                         <User className="h-5 w-5 text-slate-400" />
                                         <Input
+                                            id="displayName"
                                             placeholder="Enter your name"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
                                             className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
                                             autoFocus
                                         />
                                     </div>
                                 </div>
 
-                                {/* Room Password (if joining a specific room) */}
+                                {/* Room Password (if joining a specific room via URL) */}
                                 {roomId && (
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-300">Room Password (if required)</label>
+                                        <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300">
+                                            Room Password (if required)
+                                        </label>
                                         <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
                                             <Lock className="h-5 w-5 text-slate-400" />
                                             <Input
+                                                id="roomPassword"
                                                 type="password"
                                                 placeholder="Enter room password"
                                                 value={roomPassword}
@@ -172,7 +267,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     <Button
                                         onClick={() => handleRoleSelect("brother")}
                                         className="w-full h-12 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-white transition-all hover:scale-[1.02] shadow-md"
-                                        disabled={!name.trim()}
+                                        disabled={!displayName.trim()}
                                     >
                                         <User className="mr-2 h-5 w-5" />
                                         Join as Brother
@@ -181,7 +276,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     <Button
                                         onClick={() => handleRoleSelect("sister")}
                                         className="w-full h-12 md:h-14 bg-rose-600 hover:bg-rose-700 text-white transition-all hover:scale-[1.02] shadow-md relative"
-                                        disabled={!name.trim()}
+                                        disabled={!displayName.trim()}
                                     >
                                         <User className="mr-2 h-5 w-5" />
                                         Join as Sister
@@ -192,7 +287,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                         onClick={() => handleRoleSelect("host")}
                                         variant="outline"
                                         className="w-full h-12 md:h-14 border-amber-500/50 text-amber-500 hover:bg-amber-500/10 hover:text-amber-400 transition-all relative"
-                                        disabled={!name.trim()}
+                                        disabled={!displayName.trim()}
                                     >
                                         <Crown className="mr-2 h-5 w-5" />
                                         Join as Host (Admin)
@@ -200,29 +295,15 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     </Button>
                                 </div>
                             </div>
-
-                            {/* Browse Rooms Button - only show when NOT joining a specific room */}
-                            {!roomId && (
-                                <div className="pt-2 border-t border-slate-700/50">
-                                    <Button
-                                        type="button"
-                                        onClick={() => window.location.href = '/rooms'}
-                                        variant="ghost"
-                                        className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
-                                    >
-                                        Browse Existing Rooms
-                                    </Button>
-                                </div>
-                            )}
                         </div>
                     )}
 
-                    {/* Step 2: Password Entry (Sister or Host) */}
-                    {(step === 'sister-password' || step === 'host-password') && (
+                    {/* Password Entry (Sister or Host) */}
+                    {(roleStep === 'sister-password' || roleStep === 'host-password') && (
                         <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                             <div className="flex items-center gap-2 mb-2">
                                 <Button
-                                    onClick={handleBack}
+                                    onClick={handleBackToRoleSelection}
                                     variant="ghost"
                                     size="sm"
                                     className="text-slate-400 hover:text-white -ml-2"
@@ -233,31 +314,32 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                             </div>
 
                             {/* Role indicator card */}
-                            <div className={`p-3 rounded-lg border ${step === 'host-password'
+                            <div className={`p-3 rounded-lg border ${roleStep === 'host-password'
                                     ? 'bg-amber-500/10 border-amber-500/30'
                                     : 'bg-rose-500/10 border-rose-500/30'
                                 }`}>
                                 <p className="text-sm text-slate-300">
-                                    Joining as <strong className="text-white">{name}</strong> • <strong className={step === 'host-password' ? 'text-amber-400' : 'text-rose-400'}>
-                                        {step === 'host-password' ? 'Host' : 'Sister'}
+                                    Joining as <strong className="text-white">{displayName}</strong> • <strong className={roleStep === 'host-password' ? 'text-amber-400' : 'text-rose-400'}>
+                                        {roleStep === 'host-password' ? 'Host' : 'Sister'}
                                     </strong>
                                 </p>
                             </div>
 
                             <form onSubmit={handlePasswordSubmit} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-300">
-                                        {step === 'host-password' ? 'Host Password' : 'Sister Password'}
+                                    <label htmlFor="rolePassword" className="text-sm font-medium text-slate-300">
+                                        {roleStep === 'host-password' ? 'Host Password' : 'Sister Password'}
                                     </label>
                                 </div>
 
                                 <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
                                     <Lock className="h-5 w-5 text-slate-400" />
                                     <Input
+                                        id="rolePassword"
                                         type="password"
-                                        placeholder={`Enter ${step === 'host-password' ? 'host' : 'sister'} password`}
-                                        value={step === 'host-password' ? hostPassword : sisterPassword}
-                                        onChange={(e) => step === 'host-password' ? setHostPassword(e.target.value) : setSisterPassword(e.target.value)}
+                                        placeholder={`Enter ${roleStep === 'host-password' ? 'host' : 'sister'} password`}
+                                        value={roleStep === 'host-password' ? hostPassword : sisterPassword}
+                                        onChange={(e) => roleStep === 'host-password' ? setHostPassword(e.target.value) : setSisterPassword(e.target.value)}
                                         className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
                                         autoFocus
                                     />
@@ -265,21 +347,21 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
                                 <Button
                                     type="submit"
-                                    className={`w-full h-12 text-white transition-all shadow-md ${step === 'host-password'
+                                    className={`w-full h-12 text-white transition-all shadow-md ${roleStep === 'host-password'
                                             ? 'bg-amber-600 hover:bg-amber-700'
                                             : 'bg-rose-600 hover:bg-rose-700'
                                         }`}
-                                    disabled={isLoading || (step === 'host-password' ? !hostPassword : !sisterPassword)}
+                                    disabled={isLoading || (roleStep === 'host-password' ? !hostPassword : !sisterPassword)}
                                 >
-                                    {step === 'host-password' ? <Crown className="mr-2 h-5 w-5" /> : <User className="mr-2 h-5 w-5" />}
-                                    {isLoading ? 'Joining...' : `Join as ${step === 'host-password' ? 'Host' : 'Sister'}`}
+                                    {roleStep === 'host-password' ? <Crown className="mr-2 h-5 w-5" /> : <User className="mr-2 h-5 w-5" />}
+                                    {isLoading ? 'Joining...' : `Join as ${roleStep === 'host-password' ? 'Host' : 'Sister'}`}
                                 </Button>
                             </form>
                         </div>
                     )}
 
                     {/* Loading State for Brother Joining */}
-                    {step === 'brother-joining' && (
+                    {roleStep === 'brother-joining' && (
                         <div className="flex flex-col items-center justify-center py-10 space-y-4 animate-in fade-in duration-300">
                             <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
                             <p className="text-emerald-400 font-medium">Joining as Brother...</p>
