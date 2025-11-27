@@ -14,7 +14,7 @@ import { Gender } from "@/types";
 import { User, ShieldCheck, Crown, ArrowLeft, Lock } from "lucide-react";
 
 interface LobbySelectionProps {
-    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string) => void;
+    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string) => void;
     roomId?: string;
     roomName?: string;
 }
@@ -36,16 +36,39 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Step 1: Validate and proceed to step 2
-    const handleContinueToStep2 = () => {
+    // Step 1: Validate room ID and proceed to step 2
+    const handleContinueToStep2 = async () => {
         setError("");
+        setIsLoading(true);
         
         if (!enteredRoomID.trim()) {
             setError("Please enter a Room ID.");
+            setIsLoading(false);
             return;
         }
         
-        setStep(2);
+        // Validate that the room exists
+        try {
+            const res = await fetch(`/api/rooms/${enteredRoomID.trim()}`);
+            
+            if (!res.ok) {
+                if (res.status === 404) {
+                    setError("Room not found. Please check the Room ID and try again.");
+                } else {
+                    setError("Failed to validate room. Please try again.");
+                }
+                setIsLoading(false);
+                return;
+            }
+            
+            // Room exists, proceed to step 2
+            setStep(2);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error validating room:', error);
+            setError("Failed to validate room. Please try again.");
+            setIsLoading(false);
+        }
     };
 
     // Step 2: Go back to step 1
@@ -67,11 +90,13 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             return;
         }
 
+        const actualRoomId = roomId || enteredRoomID;
+
         if (role === 'brother') {
             setRoleStep('brother-joining');
             setIsLoading(true);
             try {
-                onJoin(displayName, 'male', false, roomPassword || undefined);
+                onJoin(displayName, 'male', false, roomPassword || undefined, actualRoomId);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
@@ -93,6 +118,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
         const hostPwd = process.env.NEXT_PUBLIC_HOST_PASSWORD;
         const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD;
+        const actualRoomId = roomId || enteredRoomID;
 
         if (roleStep === 'host-password') {
             if (hostPassword !== hostPwd) {
@@ -101,7 +127,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                onJoin(displayName, 'host', true, roomPassword || undefined);
+                onJoin(displayName, 'host', true, roomPassword || undefined, actualRoomId);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
@@ -113,7 +139,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                onJoin(displayName, 'female', false, roomPassword || undefined);
+                onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId);
             } catch (err) {
                 setError("Failed to join. Please try again.");
                 setIsLoading(false);
@@ -187,9 +213,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                             <Button
                                 onClick={handleContinueToStep2}
                                 className="w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-white transition-all hover:scale-[1.02] shadow-md"
-                                disabled={!enteredRoomID.trim()}
+                                disabled={!enteredRoomID.trim() || isLoading}
                             >
-                                Continue
+                                {isLoading ? 'Validating...' : 'Continue'}
                             </Button>
 
                             {/* Browse Rooms Footer */}

@@ -36,13 +36,16 @@ function HomeContent() {
         }
     };
 
-    const handleJoin = async (name: string, gender: Gender, host: boolean, roomPassword?: string) => {
+    const handleJoin = async (name: string, gender: Gender, host: boolean, roomPassword?: string, enteredRoomId?: string) => {
         try {
+            // Use the explicitly passed room ID, or fall back to currentRoomId
+            const actualRoomId = enteredRoomId || currentRoomId;
+            
             const res = await fetch('/api/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    roomId: currentRoomId,
+                    roomId: actualRoomId,
                     participantName: name,
                     gender: gender,
                     isHost: host,
