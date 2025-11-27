@@ -1,0 +1,16 @@
+[
+  {
+    "roomId": "3241da6e35ff697d",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Labeeb and Aiyan\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": true,
+      "hasSessionPassword": false
+    },
+    "id": "5a7663b9a7df71e9",
+    "timestamp": 1764245565155
+  }
+]

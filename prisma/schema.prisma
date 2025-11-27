@@ -1,0 +1,292 @@
+// Separa - Video Conferencing Platform
+// Prisma Schema for MongoDB
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+// User Model - Core user information
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  email             String    @unique
+  username          String    @unique
+  password          String    // Hashed password
+  name              String
+  gender            Gender
+  role              UserRole  @default(PARTICIPANT)
+  
+  // Profile
+  avatar            String?
+  bio               String?
+  phoneNumber       String?
+  
+  // Security
+  emailVerified     Boolean   @default(false)
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+  
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+  
+  // Relations
+  createdRooms      Room[]    @relation("RoomCreator")
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  preferences       UserPreferences?
+  
+  @@map("users")
+}
+
+// User Preferences - Settings and configurations
+model UserPreferences {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String   @unique @db.ObjectId
+  
+  // Notification preferences
+  emailNotifications    Boolean  @default(true)
+  sessionReminders      Boolean  @default(true)
+  
+  // Display preferences
+  theme                 String   @default("dark")
+  language              String   @default("en")
+  
+  // Privacy preferences
+  showOnlineStatus      Boolean  @default(true)
+  allowDirectMessages   Boolean  @default(true)
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_preferences")
+}
+
+// Session Model - User sessions and history
+model Session {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String    @db.ObjectId
+  roomId            String    @db.ObjectId
+  
+  // Session details
+  joinedAt          DateTime  @default(now())
+  leftAt            DateTime?
+  duration          Int?      // Duration in seconds
+  
+  // Connection info
+  ipAddress         String
+  userAgent         String?
+  deviceType        String?   // mobile, desktop, tablet
+  
+  // LiveKit info
+  livekitIdentity   String
+  livekitToken      String?
+  
+  // Session state
+  isActive          Boolean   @default(true)
+  disconnectReason  String?
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room              Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([roomId])
+  @@index([isActive])
+  @@map("sessions")
+}
+
+// Room Model - Enhanced with Prisma
+model Room {
+  id                    String              @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String
+  description           String?
+  template              RoomTemplate
+  
+  // Access control
+  locked                Boolean             @default(false)
+  password              String?             // Hashed password
+  sessionPassword       String?             // Hashed session password
+  sessionPasswordExpiry DateTime?
+  
+  // Security
+  blockedIps            IPBan[]
+  allowedIps            String[]
+  securityConfig        SecurityConfig?
+  
+  // Creator & timestamps
+  creatorId             String              @db.ObjectId
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  // Room settings
+  settings              RoomSettings
+  
+  // Status
+  isActive              Boolean             @default(true)
+  maxParticipants       Int?
+  currentParticipants   Int                 @default(0)
+  
+  // Relations
+  creator               User                @relation("RoomCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  sessions              Session[]
+  auditLogs             AuditLog[]
+  
+  @@index([creatorId])
+  @@index([template])
+  @@index([isActive])
+  @@map("rooms")
+}
+
+// Audit Log Model - Enhanced security logging
+model AuditLog {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  roomId          String       @db.ObjectId
+  userId          String?      @db.ObjectId
+  
+  // Action details
+  action          AuditAction
+  actorName       String
+  actorIdentity   String?
+  targetName      String?
+  details         String
+  
+  // Context
+  timestamp       DateTime     @default(now())
+  ipAddress       String?
+  metadata        Json?
+  
+  // Relations
+  room            Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user            User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([roomId])
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+// Refresh Token Model - For JWT refresh tokens
+model RefreshToken {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  token       String   @unique
+  userId      String   @db.ObjectId
+  
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  
+  // Device info
+  ipAddress   String?
+  userAgent   String?
+  
+  isRevoked   Boolean  @default(false)
+  revokedAt   DateTime?
+  
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// Password Reset Model
+model PasswordReset {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  token       String   @unique
+  
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  usedAt      DateTime?
+  
+  @@index([userId])
+  @@map("password_resets")
+}
+
+// Email Verification Model
+model EmailVerification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  token       String   @unique
+  
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  verifiedAt  DateTime?
+  
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+// Enums
+enum Gender {
+  MALE
+  FEMALE
+  HOST
+}
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  PARTICIPANT
+}
+
+enum RoomTemplate {
+  BROTHERS_ONLY
+  SISTERS_ONLY
+  MIXED_HOST_REQUIRED
+  OPEN
+}
+
+enum AuditAction {
+  ROOM_CREATED
+  ROOM_UPDATED
+  ROOM_DELETED
+  PARTICIPANT_JOINED
+  PARTICIPANT_LEFT
+  PARTICIPANT_KICKED
+  PARTICIPANT_BANNED
+  IP_BLOCKED
+  IP_UNBLOCKED
+  PASSWORD_CHANGED
+  SESSION_PASSWORD_SET
+  SETTINGS_UPDATED
+  SPOTLIGHT_GRANTED
+  SPOTLIGHT_REVOKED
+  E2EE_ENABLED
+  E2EE_DISABLED
+  USER_REGISTERED
+  USER_LOGIN
+  USER_LOGOUT
+}
+
+// Embedded Types (MongoDB)
+type IPBan {
+  ip          String
+  reason      String?
+  bannedAt    DateTime
+  bannedBy    String
+  expiresAt   DateTime?
+}
+
+type SecurityConfig {
+  e2eeEnabled                 Boolean
+  e2eeKeyRotationInterval     Int?
+  requireVerifiedParticipants Boolean?
+  maxLoginAttempts            Int?
+  lockoutDuration             Int?
+  allowedIpRanges             String[]
+  geoBlockEnabled             Boolean?
+  blockedCountries            String[]
+}
+
+type RoomSettings {
+  allowedGenders  Gender[]
+  requireHost     Boolean
+  maxParticipants Int?
+  e2ee            Boolean?
+}

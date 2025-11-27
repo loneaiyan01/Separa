@@ -70,5 +70,34 @@
       "requireHost": true,
       "maxParticipants": null
     }
+  },
+  {
+    "id": "3241da6e35ff697d",
+    "name": "Labeeb and Aiyan",
+    "description": "",
+    "template": "brothers-only",
+    "locked": true,
+    "password": "05cce1348dd97e1dd4653de543974d75f5b474c6b86811a17126d7c8fe31f6ba",
+    "creator": "anonymous",
+    "createdAt": 1764245565144,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]
