@@ -1,0 +1,16 @@
+﻿next.config.ts(8,3): error TS2353: Object literal may only specify known properties, and 'skipWaiting' does not exist in type 'PluginOptions'.
+src/app/api/notifications/send/route.ts(2,21): error TS7016: Could not find a declaration file for module 'web-push'. 'C:/Users/Aiyan Ali/FunModels/AntiGravity/Separa/node_modules/web-push/src/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/web-push` if it exists or add a new declaration (.d.ts) file containing `declare module 'web-push';`
+src/app/api/notifications/send/route.ts(56,34): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/send/route.ts(62,38): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/send/route.ts(118,28): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/subscribe/route.ts(21,47): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/subscribe/route.ts(33,42): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/subscribe/route.ts(39,21): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/app/api/notifications/unsubscribe/route.ts(19,18): error TS2339: Property 'pushSubscription' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/notifications/unsubscribe/route.ts(21,21): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/lib/notifications.ts(92,7): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'string | BufferSource | null | undefined'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength

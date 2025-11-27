@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     ControlBar,
     LiveKitRoom,
@@ -9,12 +9,28 @@ import {
     GridLayout,
     ParticipantTile,
     useRoomContext,
+    useConnectionState,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
-import { Track, RemoteTrackPublication } from 'livekit-client';
+import { Track, RemoteTrackPublication, ConnectionState } from 'livekit-client';
 import { Gender, ParticipantMetadata, AuditLog } from '@/types';
-import { Users, Star, X, Shield, Activity, Ban } from 'lucide-react';
+import { Users, Star, X, Shield, Activity, Ban, Loader2, Home, WifiOff, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import ChatPanel from '@/components/ChatPanel';
+import {
+    logConnectionEvent,
+    saveSessionState,
+    clearSessionState,
+} from '@/lib/connection-utils';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { VideoLayoutMode } from '@/types/layout';
+import LayoutSelector from '@/components/LayoutSelector';
+import GalleryLayout from '@/components/layouts/GalleryLayout';
+import SpeakerLayout from '@/components/layouts/SpeakerLayout';
+import SidebarLayout from '@/components/layouts/SidebarLayout';
+import PiPLayout from '@/components/layouts/PiPLayout';
 
 interface VideoRoomProps {
     token: string;
@@ -25,30 +41,117 @@ interface VideoRoomProps {
 }
 
 export default function VideoRoom({ token, userGender, isHost, onLeave, roomName }: VideoRoomProps) {
+    const [reconnectAttempts, setReconnectAttempts] = useState(0);
+    const maxReconnectAttempts = 5;
+    const isMobile = useIsMobile();
+    const networkStatus = useNetworkStatus();
+
+    const handleDisconnected = useCallback(() => {
+        logConnectionEvent('Disconnected from room', { roomName });
+        clearSessionState(roomName);
+
+        if (reconnectAttempts >= maxReconnectAttempts) {
+            alert('Connection lost. Returning to lobby.');
+            onLeave();
+        }
+    }, [onLeave, roomName, reconnectAttempts]);
+
+    const handleError = useCallback((error: Error) => {
+        console.error('LiveKit error:', error);
+        logConnectionEvent('Connection error', { error: error.message });
+    }, []);
+
+    // Adjust video quality based on network conditions
+    const getVideoQuality = () => {
+        if (!networkStatus.isOnline) {
+            return { width: 320, height: 240, frameRate: 10 };
+        }
+        
+        if (networkStatus.isSlow) {
+            return { width: 480, height: 360, frameRate: 15 };
+        }
+        
+        if (networkStatus.effectiveType === '3g') {
+            return { width: 640, height: 480, frameRate: 20 };
+        }
+        
+        // 4G or better
+        return isMobile 
+            ? { width: 1280, height: 720, frameRate: 30 }
+            : { width: 1920, height: 1080, frameRate: 30 };
+    };
+
+    const videoQuality = getVideoQuality();
+
     return (
         <LiveKitRoom
-            video={true}
+            video={{
+                resolution: `${videoQuality.width}x${videoQuality.height}` as any,
+                frameRate: videoQuality.frameRate,
+            }}
             audio={true}
             token={token}
             serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
             data-lk-theme="default"
             style={{ height: '100vh' }}
-            onDisconnected={onLeave}
+            onDisconnected={handleDisconnected}
+            onError={handleError}
+            connectOptions={{
+                autoSubscribe: true,
+            }}
         >
-            <RoomContent userGender={userGender} isHost={isHost} roomName={roomName} />
+            <RoomContent
+                userGender={userGender}
+                isHost={isHost}
+                roomName={roomName}
+                reconnectAttempts={reconnectAttempts}
+                setReconnectAttempts={setReconnectAttempts}
+                maxReconnectAttempts={maxReconnectAttempts}
+                onLeave={onLeave}
+                isMobile={isMobile}
+                networkStatus={networkStatus}
+            />
             <RoomAudioRenderer />
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass rounded-full px-4 py-2 shadow-2xl">
-                <ControlBar variation="minimal" controls={{ chat: false, screenShare: true }} />
+            
+            {/* Mobile-optimized control bar */}
+            <div className={`fixed ${isMobile ? 'bottom-4' : 'bottom-6'} left-1/2 -translate-x-1/2 z-50 glass-strong rounded-full ${isMobile ? 'px-2 py-1.5' : 'px-4 py-2'} shadow-2xl border border-slate-700/50 animate-slide-up`}>
+                <ControlBar variation="minimal" controls={{ chat: false, screenShare: !isMobile }} />
             </div>
         </LiveKitRoom>
     );
 }
 
-function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isHost: boolean; roomName: string }) {
+function RoomContent({
+    userGender,
+    isHost,
+    roomName,
+    reconnectAttempts,
+    setReconnectAttempts,
+    maxReconnectAttempts,
+    onLeave,
+    isMobile,
+    networkStatus,
+}: {
+    userGender: Gender;
+    isHost: boolean;
+    roomName: string;
+    reconnectAttempts: number;
+    setReconnectAttempts: (value: number | ((prev: number) => number)) => void;
+    maxReconnectAttempts: number;
+    onLeave: () => void;
+    isMobile: boolean;
+    networkStatus: any;
+}) {
     const [showParticipants, setShowParticipants] = useState(false);
     const [showAuditLogs, setShowAuditLogs] = useState(false);
     const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [showChat, setShowChat] = useState(false);
+    const [layoutMode, setLayoutMode] = useState<VideoLayoutMode>('gallery');
     const room = useRoomContext();
+    const router = useRouter();
+    const connectionState = useConnectionState();
+    const localParticipant = room?.localParticipant;
 
     const allParticipants = useParticipants();
 
@@ -211,7 +314,91 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
     };
 
 
+    // Monitor connection state and handle reconnection
+    useEffect(() => {
+        if (connectionState === ConnectionState.Connected) {
+            logConnectionEvent('Connection state: Connected');
+            setReconnectAttempts(0); // Reset on successful connection
+        } else if (connectionState === ConnectionState.Reconnecting) {
+            logConnectionEvent('Connection state: Reconnecting');
+            setReconnectAttempts(prev => prev + 1);
+        } else if (connectionState === ConnectionState.Disconnected) {
+            logConnectionEvent('Connection state: Disconnected');
+        }
+    }, [connectionState, setReconnectAttempts]);
 
+    // Save session state periodically
+    useEffect(() => {
+        if (!room || connectionState !== ConnectionState.Connected) return;
+
+        const interval = setInterval(() => {
+            const spotlighted = new Set<string>();
+            allParticipants.forEach(p => {
+                if (p.metadata) {
+                    try {
+                        const meta: ParticipantMetadata = JSON.parse(p.metadata);
+                        if (meta.isSpotlighted) {
+                            spotlighted.add(p.identity);
+                        }
+                    } catch { }
+                }
+            });
+
+            saveSessionState(roomName, {
+                spotlightedParticipants: spotlighted,
+                participantMetadata: new Map(),
+                lastUpdateTime: Date.now(),
+            });
+        }, 5000); // Save every 5 seconds
+
+        return () => clearInterval(interval);
+    }, [room, allParticipants, roomName, connectionState]);
+
+    const handleNavigateHome = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        e?.preventDefault();
+        setShowLeaveConfirm(true);
+    };
+
+    const handleCancelLeave = (e?: React.MouseEvent) => {
+        try {
+            e?.stopPropagation();
+            e?.preventDefault();
+            setShowLeaveConfirm(false);
+        } catch (error) {
+            console.error('Error closing modal:', error);
+            setShowLeaveConfirm(false);
+        }
+    };
+
+    const confirmLeave = async (e?: React.MouseEvent) => {
+        try {
+            e?.stopPropagation();
+            e?.preventDefault();
+            
+            // Close modal first to prevent UI issues
+            setShowLeaveConfirm(false);
+            
+            // Disconnect from LiveKit room properly
+            if (room) {
+                await room.disconnect(true); // Force disconnect
+            }
+            
+            clearSessionState(roomName);
+            
+            // Small delay to allow cleanup
+            setTimeout(() => {
+                onLeave();
+                router.push('/');
+            }, 150);
+        } catch (error) {
+            console.error('Error leaving room:', error);
+            // Force leave even if there's an error
+            clearSessionState(roomName);
+            onLeave();
+            router.push('/');
+        }
+    };
 
     useEffect(() => {
         if (showAuditLogs) {
@@ -219,20 +406,128 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
         }
     }, [showAuditLogs]);
 
-    return (
-        <div className="relative h-[calc(100vh-100px)]">
-            <GridLayout tracks={filteredTracks} style={{ height: '100%' }}>
-                <ParticipantTile />
-            </GridLayout>
+    const isReconnecting = connectionState === ConnectionState.Reconnecting;
 
-            {/* E2EE Indicator */}
-            <div className="absolute left-4 top-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full backdrop-blur-md">
-                <Shield className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-medium text-emerald-400">End-to-End Encrypted</span>
+    // Render the appropriate layout based on mode
+    const renderLayout = () => {
+        switch (layoutMode) {
+            case 'speaker':
+                return <SpeakerLayout tracks={filteredTracks} isMobile={isMobile} />;
+            case 'sidebar':
+                return <SidebarLayout tracks={filteredTracks} isMobile={isMobile} />;
+            case 'pip':
+                return <PiPLayout tracks={filteredTracks} isMobile={isMobile} />;
+            case 'gallery':
+            default:
+                return <GalleryLayout tracks={filteredTracks} isMobile={isMobile} />;
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full">
+            {/* Network Status Indicator */}
+            {networkStatus.isSlow && (
+                <div className="absolute left-4 bottom-4 z-50 flex items-center gap-2 px-4 py-2 bg-orange-500/10 border border-orange-500/30 rounded-full backdrop-blur-md shadow-lg animate-slide-up">
+                    <WifiOff className="w-4 h-4 text-orange-400 animate-pulse" />
+                    <span className="text-xs font-semibold text-orange-400">Slow Connection - Reducing Quality</span>
+                </div>
+            )}
+
+            {/* Dynamic Layout Rendering */}
+            <div className="w-full h-full">
+                {renderLayout()}
             </div>
 
-            {/* Host Controls */}
-            {isHost && (
+            {/* E2EE Indicator */}
+            <div className="absolute left-4 top-4 z-50 flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full backdrop-blur-md shadow-lg animate-fade-in">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-semibold text-emerald-400">End-to-End Encrypted</span>
+            </div>
+
+            {/* Clickable Separa Branding */}
+            <button
+                onClick={handleNavigateHome}
+                className="absolute left-1/2 -translate-x-1/2 top-4 z-50 px-6 py-2.5 glass-strong border border-slate-600/50 rounded-full shadow-xl transition-all hover:scale-105 group animate-fade-in"
+            >
+                <div className="flex items-center gap-2">
+                    <Home className="w-4 h-4 text-primary group-hover:text-emerald-400 transition-colors" />
+                    <span className="text-lg font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Separa</span>
+                </div>
+            </button>
+
+            {/* Reconnection Overlay */}
+            {isReconnecting && (
+                <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div className="glass rounded-2xl p-8 max-w-md w-full mx-4 border-slate-700/50 shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <div className="flex flex-col items-center gap-6">
+                            <div className="relative">
+                                <Loader2 className="w-16 h-16 text-primary animate-spin" />
+                                <WifiOff className="w-8 h-8 text-red-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                            </div>
+                            <div className="text-center space-y-2">
+                                <h3 className="text-2xl font-bold text-white">Reconnecting...</h3>
+                                <p className="text-slate-400">
+                                    Connection lost. Attempting to reconnect.
+                                </p>
+                                <p className="text-sm text-slate-500">
+                                    Attempt {reconnectAttempts} of {maxReconnectAttempts}
+                                </p>
+                            </div>
+                            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="h-full bg-primary transition-all duration-300 rounded-full"
+                                    style={{ width: `${(reconnectAttempts / maxReconnectAttempts) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Leave Confirmation Dialog */}
+            {showLeaveConfirm && (
+                <div 
+                    className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
+                    onClick={handleCancelLeave}
+                >
+                    <div 
+                        className="glass-strong rounded-2xl p-8 max-w-md w-full border border-slate-700/50 shadow-2xl animate-scale-in"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="space-y-6">
+                            <div className="text-center space-y-3">
+                                <div className="mx-auto w-16 h-16 rounded-2xl bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+                                    <Home className="w-8 h-8 text-red-400" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white">Leave Room?</h3>
+                                <p className="text-slate-400 text-base">
+                                    Are you sure you want to leave this room and return to the home page?
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button
+                                    onClick={handleCancelLeave}
+                                    variant="ghost"
+                                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold"
+                                    type="button"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={confirmLeave}
+                                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold shadow-lg"
+                                    type="button"
+                                >
+                                    Leave Room
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Host Controls - Mobile optimized */}
+            {isHost && !isMobile && (
                 <div className="absolute right-28 top-4 z-50">
                     <Button
                         onClick={() => setShowAuditLogs(true)}
@@ -280,18 +575,43 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
                 </div>
             )}
 
-            {/* Toggle participant list button */}
-            <Button
-                onClick={() => setShowParticipants(!showParticipants)}
-                className="absolute right-4 top-4 z-50 bg-slate-800/80 hover:bg-slate-700 text-white backdrop-blur-md border border-slate-600 shadow-lg"
-                size="sm"
-            >
-                <Users className="w-4 h-4 mr-2" />
-                {visibleParticipants.length}
-            </Button>
+            {/* Top Right Controls - Mobile optimized */}
+            <div className={`absolute ${isMobile ? 'right-2 top-2' : 'right-4 top-4'} z-50 flex gap-2 animate-fade-in`}>
+                {/* Layout Selector */}
+                <LayoutSelector
+                    currentLayout={layoutMode}
+                    onLayoutChange={setLayoutMode}
+                    isMobile={isMobile}
+                />
 
-            {/* Participant list sidebar */}
-            <div className={`${showParticipants ? 'w-96 translate-x-0' : 'w-96 translate-x-full'} transition-transform duration-300 ease-in-out fixed right-0 top-0 bottom-[100px] z-40 glass border-l border-slate-700/50`}>
+                {/* Chat Button */}
+                <Button
+                    onClick={() => setShowChat(!showChat)}
+                    className={`glass-strong hover:bg-slate-700/80 text-white border border-slate-600/50 shadow-xl transition-all hover:scale-105 relative ${isMobile ? 'min-h-[44px] min-w-[44px]' : ''}`}
+                    size={isMobile ? "sm" : "sm"}
+                >
+                    <MessageSquare className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4 mr-2'}`} />
+                    {!isMobile && 'Chat'}
+                </Button>
+
+                {/* Participants Button */}
+                <Button
+                    onClick={() => setShowParticipants(!showParticipants)}
+                    className={`glass-strong hover:bg-slate-700/80 text-white border border-slate-600/50 shadow-xl transition-all hover:scale-105 ${isMobile ? 'min-h-[44px] min-w-[44px]' : ''}`}
+                    size={isMobile ? "sm" : "sm"}
+                >
+                    <Users className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4 mr-2'}`} />
+                    {!isMobile && visibleParticipants.length}
+                    {isMobile && (
+                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-primary to-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg">
+                            {visibleParticipants.length}
+                        </span>
+                    )}
+                </Button>
+            </div>
+
+            {/* Participant list sidebar - Mobile responsive */}
+            <div className={`${showParticipants ? 'translate-x-0' : 'translate-x-full'} ${isMobile ? 'w-full' : 'w-96'} transition-transform duration-300 ease-in-out fixed right-0 top-0 bottom-[100px] z-40 glass border-l border-slate-700/50`}>
                 <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
                     <h3 className="font-semibold text-white">
                         Participants ({visibleParticipants.length})
@@ -352,6 +672,17 @@ function RoomContent({ userGender, isHost, roomName }: { userGender: Gender; isH
                     })}
                 </div>
             </div>
+
+            {/* Chat Panel */}
+            <ChatPanel
+                isOpen={showChat}
+                onClose={() => setShowChat(false)}
+                userGender={userGender}
+                userId={localParticipant?.identity || ''}
+                userName={localParticipant?.name || localParticipant?.identity || 'User'}
+                isHost={isHost}
+                roomName={roomName}
+            />
         </div>
     );
 }

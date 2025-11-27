@@ -3,6 +3,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import LobbySelection from '@/components/LobbySelection';
 import VideoRoom from '@/components/VideoRoom';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import NotificationPrompt from '@/components/NotificationPrompt';
 import { Gender } from '@/types';
 
 function HomeContent() {
@@ -94,11 +96,15 @@ function HomeContent() {
     }
 
     return (
-        <LobbySelection
-            onJoin={handleJoin}
-            roomId={currentRoomId}
-            roomName={roomDisplayName}
-        />
+        <>
+            <LobbySelection
+                onJoin={handleJoin}
+                roomId={currentRoomId}
+                roomName={roomDisplayName}
+            />
+            <PWAInstallPrompt />
+            <NotificationPrompt />
+        </>
     );
 }
 

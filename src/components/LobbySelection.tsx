@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +11,8 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { Gender } from "@/types";
-import { User, ShieldCheck, Crown, ArrowLeft, Lock } from "lucide-react";
+import { User, ShieldCheck, Crown, ArrowLeft, Lock, History, Plus } from "lucide-react";
+import CreateRoomModal from "@/components/CreateRoomModal";
 
 interface LobbySelectionProps {
     onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string) => void;
@@ -24,7 +25,8 @@ type RoleStep = 'brother-joining' | 'sister-password' | 'host-password';
 
 export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelectionProps) {
     // 2-step workflow state
-    const [step, setStep] = useState<WorkflowStep>(1);
+    // If roomId is provided via URL, skip Step 1 and go directly to Step 2
+    const [step, setStep] = useState<WorkflowStep>(roomId ? 2 : 1);
     const [enteredRoomID, setEnteredRoomID] = useState<string>("");
     const [displayName, setDisplayName] = useState("");
     
@@ -35,6 +37,53 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [roomPassword, setRoomPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [roomInfo, setRoomInfo] = useState<{ locked: boolean; name: string } | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [roomHistory, setRoomHistory] = useState<Array<{id: string; name: string; lastJoined: string}>>([]);
+
+    // Load room info and stored password when component mounts with roomId
+    useEffect(() => {
+        const fetchRoomInfo = async () => {
+            if (roomId) {
+                // If roomId exists, skip to Step 2
+                setStep(2);
+                
+                try {
+                    const res = await fetch(`/api/rooms/${roomId}`);
+                    if (res.ok) {
+                        const room = await res.json();
+                        setRoomInfo({ locked: room.locked, name: room.name });
+                        
+                        // Check for stored password from RoomCard
+                        const storedPassword = sessionStorage.getItem(`room_${roomId}_password`);
+                        if (storedPassword) {
+                            setRoomPassword(storedPassword);
+                            sessionStorage.removeItem(`room_${roomId}_password`);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching room info:', error);
+                }
+            }
+        };
+        
+        fetchRoomInfo();
+        
+        // Load room history from localStorage
+        const loadRoomHistory = () => {
+            try {
+                const history = localStorage.getItem('room_history');
+                if (history) {
+                    const parsed = JSON.parse(history);
+                    setRoomHistory(parsed.slice(0, 3)); // Show only last 3 rooms
+                }
+            } catch (error) {
+                console.error('Error loading room history:', error);
+            }
+        };
+        
+        loadRoomHistory();
+    }, [roomId]);
 
     // Step 1: Validate room ID and proceed to step 2
     const handleContinueToStep2 = async () => {
@@ -61,6 +110,17 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             
+            // Get room info to check if locked
+            const room = await res.json();
+            setRoomInfo({ locked: room.locked, name: room.name });
+            
+            // Check if there's a stored password from RoomCard
+            const storedPassword = sessionStorage.getItem(`room_${enteredRoomID.trim()}_password`);
+            if (storedPassword) {
+                setRoomPassword(storedPassword);
+                sessionStorage.removeItem(`room_${enteredRoomID.trim()}_password`);
+            }
+            
             // Room exists, proceed to step 2
             setStep(2);
             setIsLoading(false);
@@ -81,6 +141,31 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         setIsLoading(false);
     };
 
+    // Save room to history
+    const saveToHistory = (roomId: string, roomName: string) => {
+        try {
+            const history = localStorage.getItem('room_history');
+            let rooms = history ? JSON.parse(history) : [];
+            
+            // Remove existing entry if present
+            rooms = rooms.filter((r: any) => r.id !== roomId);
+            
+            // Add to beginning
+            rooms.unshift({
+                id: roomId,
+                name: roomName,
+                lastJoined: new Date().toISOString()
+            });
+            
+            // Keep only last 10 rooms
+            rooms = rooms.slice(0, 10);
+            
+            localStorage.setItem('room_history', JSON.stringify(rooms));
+        } catch (error) {
+            console.error('Error saving to history:', error);
+        }
+    };
+
     // Step 2: Handle role selection
     const handleRoleSelect = async (role: 'brother' | 'sister' | 'host') => {
         setError("");
@@ -91,6 +176,11 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         }
 
         const actualRoomId = roomId || enteredRoomID;
+        
+        // Save to history before joining
+        if (actualRoomId) {
+            saveToHistory(actualRoomId, roomInfo?.name || 'Unknown Room');
+        }
 
         if (role === 'brother') {
             setRoleStep('brother-joining');
@@ -156,23 +246,73 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         setIsLoading(false);
     };
 
+    // Handle room creation
+    const handleCreateRoom = async (roomData: {
+        name: string;
+        description: string;
+        template: any;
+        locked: boolean;
+        password?: string;
+        sessionPassword?: string;
+    }) => {
+        try {
+            // Add the required 'creator' field
+            const requestData = {
+                ...roomData,
+                creator: 'anonymous' // Default creator since we don't have auth yet
+            };
+
+            const res = await fetch('/api/rooms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to create room');
+            }
+
+            const room = await res.json();
+            
+            // Save to history
+            saveToHistory(room.id, room.name);
+            
+            // Redirect to the new room
+            window.location.href = `/?room=${room.id}`;
+        } catch (error) {
+            console.error('Error creating room:', error);
+            throw error;
+        }
+    };
+
     // Determine the room ID to display (from URL param or user input)
     const displayRoomID = roomId || enteredRoomID;
     const displayRoomName = roomName;
 
     return (
-        <div className="flex items-center justify-center min-h-screen p-4 md:p-6">
-            <Card className="w-full max-w-md glass border-0 shadow-2xl p-6 md:p-10">
+        <>
+            {/* Create Room Modal */}
+            <CreateRoomModal 
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onCreateRoom={handleCreateRoom}
+            />
+            
+            <div className="flex items-center justify-center min-h-screen p-4 md:p-6 gradient-bg">
+                <Card className="w-full max-w-md glass-strong border-0 shadow-2xl p-6 md:p-10 animate-scale-in">
                 <CardHeader className="text-center space-y-2 pb-6 px-0">
-                    <div className="mx-auto w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
-                        <ShieldCheck className="w-8 h-8 text-primary" />
+                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/30 to-emerald-600/30 rounded-2xl flex items-center justify-center mb-3 pulse-glow">
+                        <ShieldCheck className="w-10 h-10 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight text-white">Separa</CardTitle>
-                    <CardDescription className="text-slate-300">
+                    <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                        Separa
+                    </CardTitle>
+                    <CardDescription className="text-slate-300 text-base">
                         {step === 1 ? (
                             "Secure, gender‑segregated video conferencing."
                         ) : (
-                            <span>Joining: <strong>{displayRoomName || displayRoomID}</strong></span>
+                            <span>Joining: <strong className="text-primary">{displayRoomName || displayRoomID}</strong></span>
                         )}
                     </CardDescription>
                 </CardHeader>
@@ -212,13 +352,28 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
                             <Button
                                 onClick={handleContinueToStep2}
-                                className="w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-white transition-all hover:scale-[1.02] shadow-md"
+                                className="w-full h-12 md:h-14 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-primary/50"
                                 disabled={!enteredRoomID.trim() || isLoading}
                             >
-                                {isLoading ? 'Validating...' : 'Continue'}
+                                {isLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                        Validating...
+                                    </span>
+                                ) : 'Continue'}
                             </Button>
 
-                            {/* Browse Rooms Footer */}
+                            {/* Create Room Button - Glass effect like history items */}
+                            <button
+                                type="button"
+                                onClick={() => setShowCreateModal(true)}
+                                className="w-full h-12 md:h-14 px-4 rounded-md bg-emerald-600/20 hover:bg-emerald-600/30 border-2 border-emerald-500/50 hover:border-emerald-500 text-emerald-400 hover:text-emerald-300 transition-all hover:scale-[1.02] shadow-lg hover:shadow-emerald-500/20 backdrop-blur-sm flex items-center justify-center gap-2 font-semibold"
+                            >
+                                <Plus className="h-5 w-5" />
+                                Create New Room
+                            </button>
+
+                            {/* History Section */}
                             <div className="pt-2 border-t border-slate-700/50">
                                 <Button
                                     type="button"
@@ -226,8 +381,43 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     variant="ghost"
                                     className="w-full text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
                                 >
-                                    Browse Existing Rooms
+                                    <History className="mr-2 h-4 w-4" />
+                                    History
                                 </Button>
+                                
+                                {/* Show recent rooms if available */}
+                                {roomHistory.length > 0 && (
+                                    <div className="mt-3 space-y-2">
+                                        <p className="text-xs text-slate-500 px-2">Recently Joined:</p>
+                                        {roomHistory.map((room) => (
+                                            <button
+                                                key={room.id}
+                                                onClick={async () => {
+                                                    setEnteredRoomID(room.id);
+                                                    // Small delay to ensure state is updated
+                                                    setTimeout(() => {
+                                                        handleContinueToStep2();
+                                                    }, 100);
+                                                }}
+                                                className="w-full text-left px-3 py-2 rounded-md bg-slate-800/30 hover:bg-slate-700/50 transition-colors border border-slate-700/30 group"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm text-white font-medium truncate group-hover:text-primary transition-colors">
+                                                            {room.name}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500 truncate">
+                                                            {room.id}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-xs text-slate-600 ml-2">
+                                                        {new Date(room.lastJoined).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -235,18 +425,20 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                     {/* STEP 2: Identity & Role Selection (No password prompt yet) */}
                     {step === 2 && roleStep === null && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            {/* Back Button */}
-                            <div className="flex items-center gap-2 mb-2">
-                                <Button
-                                    onClick={handleBackToStep1}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-slate-400 hover:text-white -ml-2"
-                                >
-                                    <ArrowLeft className="w-4 h-4 mr-1" />
-                                    Back
-                                </Button>
-                            </div>
+                            {/* Back Button - Only show if we came from Step 1 (no roomId prop) */}
+                            {!roomId && (
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Button
+                                        onClick={handleBackToStep1}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-slate-400 hover:text-white -ml-2"
+                                    >
+                                        <ArrowLeft className="w-4 h-4 mr-1" />
+                                        Back
+                                    </Button>
+                                </div>
+                            )}
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
@@ -266,23 +458,29 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     </div>
                                 </div>
 
-                                {/* Room Password (if joining a specific room via URL) */}
-                                {roomId && (
+                                {/* Room Password (if room requires it) */}
+                                {(roomId || enteredRoomID) && (
                                     <div className="space-y-2">
-                                        <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300">
-                                            Room Password (if required)
+                                        <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                                            Room Password
+                                            {roomInfo?.locked && <span className="text-xs text-red-400 font-bold">(Required)</span>}
+                                            {!roomInfo?.locked && <span className="text-xs text-slate-500">(if required)</span>}
                                         </label>
-                                        <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary">
-                                            <Lock className="h-5 w-5 text-slate-400" />
+                                        <div className={`flex items-center gap-2 bg-slate-800/50 border rounded-md px-3 py-2 transition-colors duration-200 hover:bg-slate-700/70 focus-within:border-primary ${roomInfo?.locked ? 'border-amber-500/50' : 'border-slate-700'}`}>
+                                            <Lock className={`h-5 w-5 ${roomInfo?.locked ? 'text-amber-400' : 'text-slate-400'}`} />
                                             <Input
                                                 id="roomPassword"
                                                 type="password"
-                                                placeholder="Enter room password"
+                                                placeholder={roomInfo?.locked ? "Enter room password (required)" : "Enter room password"}
                                                 value={roomPassword}
                                                 onChange={(e) => setRoomPassword(e.target.value)}
                                                 className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
+                                                required={roomInfo?.locked}
                                             />
                                         </div>
+                                        {roomInfo?.locked && !roomPassword && (
+                                            <p className="text-xs text-amber-400">This room is locked and requires a password</p>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -292,7 +490,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                 <div className="flex flex-col gap-3">
                                     <Button
                                         onClick={() => handleRoleSelect("brother")}
-                                        className="w-full h-12 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-white transition-all hover:scale-[1.02] shadow-md"
+                                        className="w-full h-12 md:h-14 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-emerald-500/30"
                                         disabled={!displayName.trim()}
                                     >
                                         <User className="mr-2 h-5 w-5" />
@@ -301,7 +499,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
                                     <Button
                                         onClick={() => handleRoleSelect("sister")}
-                                        className="w-full h-12 md:h-14 bg-rose-600 hover:bg-rose-700 text-white transition-all hover:scale-[1.02] shadow-md relative"
+                                        className="w-full h-12 md:h-14 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-rose-500/30 relative"
                                         disabled={!displayName.trim()}
                                     >
                                         <User className="mr-2 h-5 w-5" />
@@ -312,7 +510,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     <Button
                                         onClick={() => handleRoleSelect("host")}
                                         variant="outline"
-                                        className="w-full h-12 md:h-14 border-amber-500/50 text-amber-500 hover:bg-amber-500/10 hover:text-amber-400 transition-all relative"
+                                        className="w-full h-12 md:h-14 border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500 hover:text-amber-300 font-semibold transition-all hover:scale-[1.02] shadow-lg hover:shadow-amber-500/20 relative"
                                         disabled={!displayName.trim()}
                                     >
                                         <Crown className="mr-2 h-5 w-5" />
@@ -396,5 +594,6 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 </CardContent>
             </Card>
         </div>
+        </>
     );
 }

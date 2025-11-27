@@ -99,5 +99,147 @@
     },
     "blockedIps": [],
     "allowedIps": []
+  },
+  {
+    "id": "7e8a74c3a6697a2b",
+    "name": "Test11",
+    "description": "Test11",
+    "template": "brothers-only",
+    "locked": true,
+    "password": "0c4a43c5d77f97fe9ab526573176b34a725f6a5b7b74f4a39cad882b614756f9",
+    "creator": "anonymous",
+    "createdAt": 1764256977520,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "1aca48fa330a97dd",
+    "name": "Boys only",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764258834984,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "313cbb3dc4ef8f2b",
+    "name": "bros",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764258927859,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "6b5f85d17804ceba",
+    "name": "Test For Chat",
+    "description": "",
+    "template": "mixed-host-required",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764260621120,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": true,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "c7e9f62b910eb006",
+    "name": "222222222",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764262270451,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]

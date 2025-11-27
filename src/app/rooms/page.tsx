@@ -108,9 +108,11 @@ export default function RoomsPage() {
                 {/* Header */}
                 <div className="mb-12">
                     <Link href="/">
-                        <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white">
+                        <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Home
+                            <span className="font-semibold">Separa</span>
+                            <span className="mx-2 text-slate-600">|</span>
+                            <span>Home</span>
                         </Button>
                     </Link>
 

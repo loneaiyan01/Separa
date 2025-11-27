@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // User Model - Core user information
@@ -289,4 +290,18 @@ type RoomSettings {
   requireHost     Boolean
   maxParticipants Int?
   e2ee            Boolean?
+}
+
+// Push Subscription Model - For Web Push Notifications
+model PushSubscription {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  endpoint        String    @unique
+  keys            Json      // Contains p256dh and auth keys
+  expirationTime  DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([endpoint])
+  @@map("push_subscriptions")
 }

@@ -38,11 +38,20 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
     };
 
     const handleJoinRoom = () => {
+        // Check if room is locked and needs password
+        if (room.locked) {
+            const password = prompt(`Enter password for "${room.name}":`);
+            if (!password) return; // User cancelled
+            
+            // Store password temporarily in sessionStorage to pass to lobby
+            sessionStorage.setItem(`room_${room.id}_password`, password);
+        }
+        
         window.location.href = `/?room=${room.id}`;
     };
 
     return (
-        <div className={`glass rounded-xl p-7 ${colorClasses[template.color as keyof typeof colorClasses]} border-2 transition-all hover:scale-[1.02] hover:shadow-xl group`}>
+        <div className={`glass rounded-xl p-4 sm:p-7 ${colorClasses[template.color as keyof typeof colorClasses]} border-2 transition-all hover:scale-[1.02] hover:shadow-xl group touch-manipulation`}>
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
@@ -79,7 +88,7 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
             <div className="space-y-2.5">
                 <Button
                     onClick={handleJoinRoom}
-                    className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                    className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 min-h-[44px] touch-manipulation"
                 >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Join Room
@@ -89,14 +98,14 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
                     <Button
                         onClick={handleCopyLink}
                         variant="outline"
-                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white min-h-[44px] min-w-[44px] touch-manipulation"
                         size="sm"
                         title="Copy Link"
                     >
                         {copied ? (
-                            <span className="text-emerald-400 font-bold">✓</span>
+                            <span className="text-emerald-400 font-bold text-lg">✓</span>
                         ) : (
-                            <Copy className="w-4 h-4" />
+                            <Copy className="w-5 h-5" />
                         )}
                     </Button>
 
@@ -104,14 +113,14 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
                         <Button
                             onClick={() => onToggleLock(room.id, room.locked)}
                             variant="outline"
-                            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white"
+                            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white min-h-[44px] min-w-[44px] touch-manipulation"
                             size="sm"
                             title={room.locked ? "Unlock Room" : "Lock Room"}
                         >
                             {room.locked ? (
-                                <Unlock className="w-4 h-4 text-amber-400" />
+                                <Unlock className="w-5 h-5 text-amber-400" />
                             ) : (
-                                <Lock className="w-4 h-4" />
+                                <Lock className="w-5 h-5" />
                             )}
                         </Button>
                     )}
@@ -120,11 +129,11 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
                         <Button
                             onClick={() => onDelete(room.id)}
                             variant="outline"
-                            className="flex-1 border-red-900/30 text-red-400 hover:bg-red-950/30 hover:text-red-300 hover:border-red-800/50"
+                            className="flex-1 border-red-900/30 text-red-400 hover:bg-red-950/30 hover:text-red-300 hover:border-red-800/50 min-h-[44px] min-w-[44px] touch-manipulation"
                             size="sm"
                             title="Delete Room"
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                         </Button>
                     )}
                 </div>
