@@ -382,5 +382,64 @@
     },
     "id": "c87dceb29750abdf",
     "timestamp": 1764263963853
+  },
+  {
+    "roomId": "1aca48fa330a97dd",
+    "action": "participant_joined",
+    "actorName": "AA",
+    "actorIdentity": "AA",
+    "details": "AA joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "ed2b232cb25eef40",
+    "timestamp": 1764267849890
+  },
+  {
+    "roomId": "1aca48fa330a97dd",
+    "action": "participant_joined",
+    "actorName": "AA",
+    "actorIdentity": "AA",
+    "details": "AA joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "c10f9ed13fd0d570",
+    "timestamp": 1764267875043
+  },
+  {
+    "roomId": "713f358c75571f35",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"HH\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "85d1bc98bbb506a1",
+    "timestamp": 1764268273894
+  },
+  {
+    "roomId": "713f358c75571f35",
+    "action": "participant_joined",
+    "actorName": "hh",
+    "actorIdentity": "hh",
+    "details": "hh joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "780b9fb1a1714df4",
+    "timestamp": 1764268445715
   }
 ]

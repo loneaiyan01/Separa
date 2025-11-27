@@ -241,5 +241,33 @@
     },
     "blockedIps": [],
     "allowedIps": []
+  },
+  {
+    "id": "713f358c75571f35",
+    "name": "HH",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764268273878,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]

@@ -5,6 +5,7 @@ import { ROOM_TEMPLATES } from '@/lib/room-templates';
 import { Button } from '@/components/ui/button';
 import { Copy, Lock, Unlock, Trash2, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface RoomCardProps {
     room: Omit<Room, 'password'>;
@@ -14,6 +15,7 @@ interface RoomCardProps {
 
 export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps) {
     const [copied, setCopied] = useState(false);
+    const router = useRouter();
     const template = ROOM_TEMPLATES[room.template];
 
     const colorClasses = {
@@ -42,12 +44,13 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
         if (room.locked) {
             const password = prompt(`Enter password for "${room.name}":`);
             if (!password) return; // User cancelled
-            
+
             // Store password temporarily in sessionStorage to pass to lobby
             sessionStorage.setItem(`room_${room.id}_password`, password);
         }
-        
-        window.location.href = `/?room=${room.id}`;
+
+        // Use Next.js router for client-side navigation
+        router.push(`/?room=${room.id}`);
     };
 
     return (
