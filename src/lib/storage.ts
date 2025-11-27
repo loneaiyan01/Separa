@@ -285,16 +285,27 @@ const DEFAULT_ROOMS: Room[] = [
 // In-memory cache
 let roomsCache: Room[] | null = null;
 let auditLogsCache: AuditLog[] | null = null;
+let isFileSystemWritable = true; // Assume writable initially
 
 // Ensure data directory exists
-async function ensureDataDir() {
+async function ensureDataDir(): Promise<boolean> {
+    if (!isFileSystemWritable) return false;
+
     try {
         await fs.access(DATA_DIR);
+        return true;
     } catch {
         try {
             await fs.mkdir(DATA_DIR, { recursive: true });
-        } catch (error) {
-            console.warn('Failed to create data directory (expected on Vercel):', error);
+            return true;
+        } catch (error: any) {
+            if (error.code === 'EROFS') {
+                console.warn('File system is read-only (expected on Vercel). Disabling file writes.');
+                isFileSystemWritable = false;
+                return false;
+            }
+            console.warn('Failed to create data directory:', error);
+            return false;
         }
     }
 }
@@ -307,13 +318,13 @@ export async function getAllRooms(): Promise<Room[]> {
     }
 
     try {
-        await ensureDataDir();
+        // Try to read from file first
         const data = await fs.readFile(ROOMS_FILE, 'utf-8');
         roomsCache = JSON.parse(data);
         return roomsCache!;
     } catch (error: any) {
         // If file doesn't exist or we can't read it (Vercel), use defaults
-        console.log('Using default rooms (file storage unavailable)');
+        console.log('Using default rooms (file storage unavailable or empty)');
         roomsCache = [...DEFAULT_ROOMS];
         return roomsCache;
     }
@@ -324,12 +335,20 @@ async function saveRooms(rooms: Room[]): Promise<void> {
     // Update cache first
     roomsCache = rooms;
 
+    if (!isFileSystemWritable) return;
+
     try {
-        await ensureDataDir();
+        const dirExists = await ensureDataDir();
+        if (!dirExists) return;
+
         await fs.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2), 'utf-8');
-    } catch (error) {
-        console.warn('Failed to save rooms to file (expected on Vercel):', error);
-        // We don't throw here, allowing the app to continue with in-memory updates
+    } catch (error: any) {
+        if (error.code === 'EROFS') {
+            isFileSystemWritable = false;
+            console.warn('Detected read-only file system during write. Disabling future writes.');
+        } else {
+            console.warn('Failed to save rooms to file:', error);
+        }
     }
 }
 
@@ -386,7 +405,6 @@ export async function addAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>): Prom
     // Initialize cache if needed
     if (!auditLogsCache) {
         try {
-            await ensureDataDir();
             const data = await fs.readFile(AUDIT_LOGS_FILE, 'utf-8');
             auditLogsCache = JSON.parse(data);
         } catch {
@@ -407,11 +425,20 @@ export async function addAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>): Prom
         auditLogsCache = auditLogsCache!.slice(-10000);
     }
 
-    try {
-        await ensureDataDir();
-        await fs.writeFile(AUDIT_LOGS_FILE, JSON.stringify(auditLogsCache, null, 2), 'utf-8');
-    } catch (error) {
-        console.warn('Failed to save audit logs to file (expected on Vercel):', error);
+    if (isFileSystemWritable) {
+        try {
+            const dirExists = await ensureDataDir();
+            if (dirExists) {
+                await fs.writeFile(AUDIT_LOGS_FILE, JSON.stringify(auditLogsCache, null, 2), 'utf-8');
+            }
+        } catch (error: any) {
+            if (error.code === 'EROFS') {
+                isFileSystemWritable = false;
+                console.warn('Detected read-only file system during audit log write. Disabling future writes.');
+            } else {
+                console.warn('Failed to save audit logs to file:', error);
+            }
+        }
     }
 
     return newLog;
@@ -491,4 +518,3 @@ export async function getAuditLogStats(roomId?: string): Promise<{
         recentActivity: logs.slice(0, 10) // Last 10 activities
     };
 }
-
