@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
             locked: body.locked || false,
             password: hashedPassword,
             creator: body.creator,
-            createdAt: new Date().toISOString(),
+            createdAt: Date.now(),
             settings,
         };
 

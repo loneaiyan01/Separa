@@ -1,11 +1,11 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import LobbySelection from '@/components/LobbySelection';
 import VideoRoom from '@/components/VideoRoom';
 import { Gender } from '@/types';
 
-export default function Home() {
+function HomeContent() {
     const searchParams = useSearchParams();
     const roomId = searchParams.get('room');
 
@@ -96,5 +96,13 @@ export default function Home() {
             roomId={currentRoomId}
             roomName={roomDisplayName}
         />
+    );
+}
+
+export default function Home() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <HomeContent />
+        </Suspense>
     );
 }
