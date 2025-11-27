@@ -17,13 +17,54 @@ export interface RoomSettings {
     e2ee?: boolean; // New security setting
 }
 
+export type AuditAction = 
+    | 'room_created'
+    | 'room_updated'
+    | 'room_deleted'
+    | 'participant_joined'
+    | 'participant_left'
+    | 'participant_kicked'
+    | 'participant_banned'
+    | 'ip_blocked'
+    | 'ip_unblocked'
+    | 'password_changed'
+    | 'session_password_set'
+    | 'settings_updated'
+    | 'spotlight_granted'
+    | 'spotlight_revoked'
+    | 'e2ee_enabled'
+    | 'e2ee_disabled';
+
 export interface AuditLog {
     id: string;
     roomId: string;
-    action: string;
+    action: AuditAction;
+    actorName: string; // Who performed the action
+    actorIdentity?: string; // LiveKit identity if available
+    targetName?: string; // Who was affected (for kicks, bans, etc.)
     details: string;
     timestamp: number;
     ipAddress?: string;
+    metadata?: Record<string, any>; // Additional context
+}
+
+export interface IPBan {
+    ip: string;
+    reason?: string;
+    bannedAt: number;
+    bannedBy: string;
+    expiresAt?: number; // Optional expiration timestamp
+}
+
+export interface SecurityConfig {
+    e2eeEnabled: boolean;
+    e2eeKeyRotationInterval?: number; // in minutes
+    requireVerifiedParticipants?: boolean;
+    maxLoginAttempts?: number;
+    lockoutDuration?: number; // in minutes
+    allowedIpRanges?: string[]; // CIDR notation
+    geoBlockEnabled?: boolean;
+    blockedCountries?: string[];
 }
 
 export interface Room {
@@ -32,12 +73,16 @@ export interface Room {
     description?: string;
     template: RoomTemplate;
     locked: boolean;
-    password?: string; // Room-level password (persistent)
-    sessionPassword?: string; // Session-specific password
-    blockedIps?: string[];
+    password?: string; // Room-level password (persistent, hashed)
+    sessionPassword?: string; // Session-specific password (hashed)
+    sessionPasswordExpiry?: number; // Timestamp when session password expires
+    blockedIps?: IPBan[]; // Enhanced with metadata
+    allowedIps?: string[]; // Whitelist IPs (overrides blocks)
     creator: string;
     createdAt: number;
     settings: RoomSettings;
+    securityConfig?: SecurityConfig;
+    failedLoginAttempts?: Map<string, { count: number; lastAttempt: number }>; // IP -> attempts
 }
 
 export interface CreateRoomRequest {
@@ -56,6 +101,24 @@ export interface UpdateRoomRequest {
     locked?: boolean;
     password?: string;
     sessionPassword?: string;
-    blockedIps?: string[];
+    sessionPasswordExpiry?: number;
+    blockedIps?: IPBan[];
+    allowedIps?: string[];
     settings?: Partial<RoomSettings>;
+    securityConfig?: Partial<SecurityConfig>;
+}
+
+export interface BlockIPRequest {
+    ip: string;
+    reason?: string;
+    expiresAt?: number;
+}
+
+export interface AuditLogQuery {
+    roomId?: string;
+    action?: AuditAction;
+    actorName?: string;
+    startTime?: number;
+    endTime?: number;
+    limit?: number;
 }

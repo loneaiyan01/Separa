@@ -1,7 +1,19 @@
 import { AccessToken } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
-import { getRoomById } from '@/lib/storage';
+import { getRoomById, addAuditLog } from '@/lib/storage';
+import { 
+  extractClientIp, 
+  isIpBlocked, 
+  verifyPassword, 
+  isSessionPasswordExpired,
+  checkRateLimiting,
+  recordFailedAttempt,
+  clearFailedAttempts
+} from '@/lib/security';
 import crypto from 'crypto';
+
+// Store failed login attempts in memory (in production, use Redis or similar)
+const failedLoginAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
 export async function POST(req: NextRequest) {
   const { roomId, participantName, gender, isHost, roomPassword } = await req.json();
@@ -17,6 +29,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
   }
 
+  // Extract client IP
+  const clientIp = extractClientIp(req.headers);
+
   let roomName = 'separa-demo'; // Default room
   let roomData = null;
 
@@ -28,6 +43,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 });
     }
 
+    // Get security config
+    const securityConfig = roomData.securityConfig || {
+      maxLoginAttempts: 5,
+      lockoutDuration: 15
+    };
+
+    // Check rate limiting
+    const rateLimitCheck = checkRateLimiting(
+      clientIp,
+      failedLoginAttempts,
+      securityConfig.maxLoginAttempts,
+      securityConfig.lockoutDuration
+    );
+
+    if (!rateLimitCheck.allowed) {
+      const lockedUntil = rateLimitCheck.lockedUntil 
+        ? new Date(rateLimitCheck.lockedUntil).toISOString()
+        : 'unknown';
+      
+      return NextResponse.json({ 
+        error: `Too many failed attempts. Try again later.`,
+        lockedUntil: rateLimitCheck.lockedUntil 
+      }, { status: 429 });
+    }
+
+    // Check IP blocking (enhanced)
+    const ipBlockCheck = isIpBlocked(clientIp, roomData.blockedIps, roomData.allowedIps);
+    if (ipBlockCheck.blocked) {
+      await addAuditLog({
+        roomId,
+        action: 'participant_joined',
+        actorName: participantName,
+        details: `Blocked IP ${clientIp} attempted to join. Reason: ${ipBlockCheck.reason}`,
+        ipAddress: clientIp,
+        metadata: { blocked: true, reason: ipBlockCheck.reason }
+      });
+
+      return NextResponse.json({ 
+        error: `Access denied: ${ipBlockCheck.reason || 'You have been blocked from this room.'}` 
+      }, { status: 403 });
+    }
+
     // Check if room is locked
     if (roomData.locked) {
       if (!roomPassword) {
@@ -35,34 +92,49 @@ export async function POST(req: NextRequest) {
       }
 
       // Verify password
-      const hashedPassword = crypto
-        .createHash('sha256')
-        .update(roomPassword)
-        .digest('hex');
+      if (!verifyPassword(roomPassword, roomData.password!)) {
+        recordFailedAttempt(clientIp, failedLoginAttempts);
+        
+        await addAuditLog({
+          roomId,
+          action: 'participant_joined',
+          actorName: participantName,
+          details: `Failed login attempt - incorrect password`,
+          ipAddress: clientIp,
+          metadata: { success: false, reason: 'incorrect_password' }
+        });
 
-      if (hashedPassword !== roomData.password) {
         return NextResponse.json({ error: 'Incorrect room password' }, { status: 401 });
       }
     }
 
-    // Check Session Password (if set)
+    // Check Session Password (if set and not expired)
     if (roomData.sessionPassword) {
-      // We reuse the roomPassword field for session password if the room is not locked
-      // or if the user provides it separately (though current UI uses one field)
-      // For simplicity, if sessionPassword exists, we check it against the provided password
-      // UNLESS the room is also locked, in which case we might need a separate field.
-      // Given the current UI, let's assume sessionPassword overrides or is an alternative.
-      // A better approach for the future is a separate input, but for now:
+      // Check if session password has expired
+      if (isSessionPasswordExpired(roomData.sessionPasswordExpiry)) {
+        // Session password has expired, remove it
+        // Note: This should be done in a cleanup job, but we'll do it here for now
+        console.log('Session password expired for room:', roomId);
+      } else {
+        // Session password is still valid
+        if (!roomData.locked) {
+          // If room is not locked, session password is required
+          if (!roomPassword || !verifyPassword(roomPassword, roomData.sessionPassword)) {
+            recordFailedAttempt(clientIp, failedLoginAttempts);
+            
+            await addAuditLog({
+              roomId,
+              action: 'participant_joined',
+              actorName: participantName,
+              details: `Failed login attempt - incorrect session password`,
+              ipAddress: clientIp,
+              metadata: { success: false, reason: 'incorrect_session_password' }
+            });
 
-      if (!roomData.locked && roomData.sessionPassword !== roomPassword) {
-        return NextResponse.json({ error: 'Incorrect session password' }, { status: 401 });
+            return NextResponse.json({ error: 'Incorrect session password' }, { status: 401 });
+          }
+        }
       }
-    }
-
-    // Check IP Blocking
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-    if (roomData.blockedIps?.includes(ip)) {
-      return NextResponse.json({ error: 'Access denied: You have been blocked from this room.' }, { status: 403 });
     }
 
     // Check gender restrictions based on template
@@ -71,11 +143,24 @@ export async function POST(req: NextRequest) {
 
     if (!allowedGenders.includes(userGender)) {
       const templateName = roomData.template.replace(/-/g, ' ');
+      
+      await addAuditLog({
+        roomId,
+        action: 'participant_joined',
+        actorName: participantName,
+        details: `Access denied - gender restriction (${userGender} not allowed in ${templateName} room)`,
+        ipAddress: clientIp,
+        metadata: { success: false, reason: 'gender_restriction', userGender, template: roomData.template }
+      });
+
       return NextResponse.json(
         { error: `This room is ${templateName}. You cannot join.` },
         { status: 403 }
       );
     }
+
+    // Clear failed attempts on successful validation
+    clearFailedAttempts(clientIp, failedLoginAttempts);
 
     // Use room ID as LiveKit room name
     roomName = `room-${roomId}`;
@@ -88,6 +173,23 @@ export async function POST(req: NextRequest) {
 
   at.addGrant({ roomJoin: true, room: roomName, canPublish: true, canSubscribe: true });
 
+  // Log successful join
+  if (roomId && roomData) {
+    await addAuditLog({
+      roomId,
+      action: 'participant_joined',
+      actorName: participantName,
+      actorIdentity: participantName,
+      details: `${participantName} joined as ${isHost ? 'host' : gender}`,
+      ipAddress: clientIp,
+      metadata: { 
+        gender, 
+        isHost,
+        e2eeEnabled: roomData.securityConfig?.e2eeEnabled || false
+      }
+    });
+  }
+
   return NextResponse.json({
     token: await at.toJwt(),
     room: roomData ? {
@@ -95,6 +197,7 @@ export async function POST(req: NextRequest) {
       name: roomData.name,
       description: roomData.description,
       template: roomData.template,
+      e2eeEnabled: roomData.securityConfig?.e2eeEnabled || false,
     } : null
   });
 }

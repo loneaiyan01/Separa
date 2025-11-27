@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRoomById, updateRoom, deleteRoom, addAuditLog } from '@/lib/storage';
 import { UpdateRoomRequest } from '@/types';
+import { hashPassword, extractClientIp } from '@/lib/security';
 import crypto from 'crypto';
 
 // GET - Get room by ID
@@ -16,10 +17,17 @@ export async function GET(
             return NextResponse.json({ error: 'Room not found' }, { status: 404 });
         }
 
-        // Remove password from response
-        const { password, ...sanitizedRoom } = room;
+        // Remove sensitive data from response
+        const { password, sessionPassword, blockedIps, allowedIps, ...sanitizedRoom } = room;
 
-        return NextResponse.json(sanitizedRoom);
+        return NextResponse.json({
+            ...sanitizedRoom,
+            hasPassword: !!password,
+            hasSessionPassword: !!sessionPassword,
+            sessionPasswordExpired: room.sessionPasswordExpiry ? Date.now() > room.sessionPasswordExpiry : false,
+            blockedIpsCount: blockedIps?.length || 0,
+            allowedIpsCount: allowedIps?.length || 0
+        });
     } catch (error) {
         console.error('Error fetching room:', error);
         return NextResponse.json({ error: 'Failed to fetch room' }, { status: 500 });
@@ -33,7 +41,10 @@ export async function PATCH(
 ) {
     try {
         const { roomId } = await params;
-        const body: UpdateRoomRequest = await req.json();
+        const body: UpdateRoomRequest & { actorName?: string } = await req.json();
+
+        const actorName = body.actorName || 'anonymous';
+        const clientIp = extractClientIp(req.headers);
 
         // Get existing room
         const existingRoom = await getRoomById(roomId);
@@ -43,22 +54,68 @@ export async function PATCH(
 
         // Prepare updates
         const updates: Partial<typeof existingRoom> = {};
+        const changedFields: string[] = [];
 
-        if (body.name !== undefined) updates.name = body.name;
-        if (body.description !== undefined) updates.description = body.description;
-        if (body.locked !== undefined) updates.locked = body.locked;
-        if (body.sessionPassword !== undefined) updates.sessionPassword = body.sessionPassword;
-        if (body.blockedIps !== undefined) updates.blockedIps = body.blockedIps;
+        if (body.name !== undefined && body.name !== existingRoom.name) {
+            updates.name = body.name;
+            changedFields.push('name');
+        }
+        
+        if (body.description !== undefined && body.description !== existingRoom.description) {
+            updates.description = body.description;
+            changedFields.push('description');
+        }
+        
+        if (body.locked !== undefined && body.locked !== existingRoom.locked) {
+            updates.locked = body.locked;
+            changedFields.push('locked');
+        }
+        
+        if (body.sessionPasswordExpiry !== undefined) {
+            updates.sessionPasswordExpiry = body.sessionPasswordExpiry;
+            changedFields.push('sessionPasswordExpiry');
+        }
+        
+        if (body.blockedIps !== undefined) {
+            updates.blockedIps = body.blockedIps;
+            changedFields.push('blockedIps');
+        }
+        
+        if (body.allowedIps !== undefined) {
+            updates.allowedIps = body.allowedIps;
+            changedFields.push('allowedIps');
+        }
+        
         if (body.settings !== undefined) {
             updates.settings = { ...existingRoom.settings, ...body.settings };
+            changedFields.push('settings');
+        }
+
+        if (body.securityConfig !== undefined) {
+            const currentConfig = existingRoom.securityConfig || {
+                e2eeEnabled: false,
+                maxLoginAttempts: 5,
+                lockoutDuration: 15
+            };
+            updates.securityConfig = { ...currentConfig, ...body.securityConfig } as any;
+            changedFields.push('securityConfig');
         }
 
         // Hash new password if provided
         if (body.password !== undefined) {
-            updates.password = crypto
-                .createHash('sha256')
-                .update(body.password)
-                .digest('hex');
+            updates.password = hashPassword(body.password);
+            changedFields.push('password');
+        }
+
+        // Hash new session password if provided
+        if (body.sessionPassword !== undefined) {
+            updates.sessionPassword = hashPassword(body.sessionPassword);
+            changedFields.push('sessionPassword');
+        }
+
+        // Only update if there are changes
+        if (changedFields.length === 0) {
+            return NextResponse.json({ message: 'No changes detected' }, { status: 200 });
         }
 
         // Update room
@@ -68,18 +125,48 @@ export async function PATCH(
             return NextResponse.json({ error: 'Failed to update room' }, { status: 500 });
         }
 
-        // Log action
+        // Log action with details
         await addAuditLog({
             roomId,
-            action: 'UPDATE_ROOM',
-            details: `Room updated: ${Object.keys(updates).join(', ')}`,
-            ipAddress: req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            action: 'room_updated',
+            actorName,
+            details: `Room updated: ${changedFields.join(', ')}`,
+            ipAddress: clientIp,
+            metadata: { updatedFields: changedFields }
         });
 
-        // Remove password from response
-        const { password, ...sanitizedRoom } = updatedRoom;
+        // Log password change specifically
+        if (changedFields.includes('password')) {
+            await addAuditLog({
+                roomId,
+                action: 'password_changed',
+                actorName,
+                details: 'Room password changed',
+                ipAddress: clientIp
+            });
+        }
 
-        return NextResponse.json(sanitizedRoom);
+        // Log session password change specifically
+        if (changedFields.includes('sessionPassword')) {
+            await addAuditLog({
+                roomId,
+                action: 'session_password_set',
+                actorName,
+                details: 'Session password updated',
+                ipAddress: clientIp
+            });
+        }
+
+        // Remove sensitive data from response
+        const { password, sessionPassword, blockedIps, allowedIps, ...sanitizedRoom } = updatedRoom;
+
+        return NextResponse.json({
+            ...sanitizedRoom,
+            hasPassword: !!password,
+            hasSessionPassword: !!sessionPassword,
+            blockedIpsCount: blockedIps?.length || 0,
+            allowedIpsCount: allowedIps?.length || 0
+        });
     } catch (error) {
         console.error('Error updating room:', error);
         return NextResponse.json({ error: 'Failed to update room' }, { status: 500 });
@@ -93,19 +180,34 @@ export async function DELETE(
 ) {
     try {
         const { roomId } = await params;
+        const { searchParams } = new URL(req.url);
+        const actorName = searchParams.get('actorName') || 'anonymous';
+        const clientIp = extractClientIp(req.headers);
+
+        // Get room details before deleting
+        const room = await getRoomById(roomId);
+        
+        if (!room) {
+            return NextResponse.json({ error: 'Room not found' }, { status: 404 });
+        }
 
         const success = await deleteRoom(roomId);
 
         if (!success) {
-            return NextResponse.json({ error: 'Room not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Failed to delete room' }, { status: 500 });
         }
 
-        // Log action
+        // Log action with room details
         await addAuditLog({
             roomId,
-            action: 'DELETE_ROOM',
-            details: 'Room deleted',
-            ipAddress: req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            action: 'room_deleted',
+            actorName,
+            details: `Room "${room.name}" deleted`,
+            ipAddress: clientIp,
+            metadata: {
+                roomName: room.name,
+                template: room.template
+            }
         });
 
         return NextResponse.json({ success: true });
