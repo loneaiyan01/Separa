@@ -51,59 +51,59 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
     };
 
     return (
-        <div className={`glass rounded-xl p-4 sm:p-7 ${colorClasses[template.color as keyof typeof colorClasses]} border-2 transition-all hover:scale-[1.02] hover:shadow-xl group touch-manipulation`}>
+        <div className={`glass-card rounded-2xl p-6 sm:p-7 ${colorClasses[template.color as keyof typeof colorClasses]} border-2 transition-all hover:scale-[1.02] group touch-manipulation frosted-edge`}>
             {/* Header */}
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-1">{room.name}</h3>
-                    <p className="text-sm text-slate-400">{room.description || 'No description'}</p>
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">{room.name}</h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">{room.description || 'No description'}</p>
                 </div>
                 {room.locked && (
-                    <Lock className="w-5 h-5 text-amber-400 flex-shrink-0 ml-2" />
+                    <div className="flex-shrink-0 ml-3 w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-amber-400" />
+                    </div>
                 )}
             </div>
 
             {/* Template Badge */}
-            <div className="mb-4">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${badgeClasses[template.color as keyof typeof badgeClasses]}`}>
+            <div className="mb-5">
+                <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${badgeClasses[template.color as keyof typeof badgeClasses]}`}>
                     {template.name}
                 </span>
             </div>
 
             {/* Metadata */}
-            {/* Metadata */}
-            <div className="flex flex-col gap-1.5 mb-5 text-xs font-medium text-slate-400">
-                <div className="flex items-center justify-between">
-                    <span>Created</span>
-                    <span className="text-slate-300">{new Date(room.createdAt).toLocaleDateString()}</span>
+            <div className="flex flex-col gap-2 mb-6 text-xs font-medium">
+                <div className="flex items-center justify-between p-2 rounded-lg glass-subtle">
+                    <span className="text-slate-400">Created</span>
+                    <span className="text-slate-200 font-semibold">{new Date(room.createdAt).toLocaleDateString()}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                    <span>ID</span>
-                    <span className="font-mono text-slate-300 bg-slate-800/50 px-1.5 py-0.5 rounded">{room.id}</span>
+                <div className="flex items-center justify-between p-2 rounded-lg glass-subtle">
+                    <span className="text-slate-400">Room ID</span>
+                    <span className="font-mono text-slate-200 bg-slate-800/70 px-2 py-1 rounded border border-slate-700/50">{room.id}</span>
                 </div>
             </div>
 
             {/* Actions */}
-            {/* Actions */}
-            <div className="space-y-2.5">
+            <div className="space-y-3">
                 <Button
                     onClick={handleJoinRoom}
-                    className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 min-h-[44px] touch-manipulation"
+                    className="w-full glass-button text-white font-semibold min-h-[48px] touch-manipulation premium-glow group/btn"
                 >
-                    <ExternalLink className="w-4 h-4 mr-2" />
+                    <ExternalLink className="w-5 h-5 mr-2 group-hover/btn:rotate-12 transition-transform" />
                     Join Room
                 </Button>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                     <Button
                         onClick={handleCopyLink}
                         variant="outline"
-                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white min-h-[44px] min-w-[44px] touch-manipulation"
+                        className="flex-1 glass-subtle border-slate-600/50 text-slate-300 hover:text-white hover:border-emerald-500/50 min-h-[44px] min-w-[44px] touch-manipulation transition-all"
                         size="sm"
                         title="Copy Link"
                     >
                         {copied ? (
-                            <span className="text-emerald-400 font-bold text-lg">✓</span>
+                            <span className="text-emerald-400 font-bold text-lg animate-scale-in">✓</span>
                         ) : (
                             <Copy className="w-5 h-5" />
                         )}
@@ -113,7 +113,7 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
                         <Button
                             onClick={() => onToggleLock(room.id, room.locked)}
                             variant="outline"
-                            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white min-h-[44px] min-w-[44px] touch-manipulation"
+                            className="flex-1 glass-subtle border-slate-600/50 text-slate-300 hover:text-white hover:border-amber-500/50 min-h-[44px] min-w-[44px] touch-manipulation transition-all"
                             size="sm"
                             title={room.locked ? "Unlock Room" : "Lock Room"}
                         >
@@ -129,7 +129,7 @@ export default function RoomCard({ room, onDelete, onToggleLock }: RoomCardProps
                         <Button
                             onClick={() => onDelete(room.id)}
                             variant="outline"
-                            className="flex-1 border-red-900/30 text-red-400 hover:bg-red-950/30 hover:text-red-300 hover:border-red-800/50 min-h-[44px] min-w-[44px] touch-manipulation"
+                            className="flex-1 glass-subtle border-red-900/50 text-red-400 hover:bg-red-950/50 hover:text-red-300 hover:border-red-700/70 min-h-[44px] min-w-[44px] touch-manipulation transition-all"
                             size="sm"
                             title="Delete Room"
                         >

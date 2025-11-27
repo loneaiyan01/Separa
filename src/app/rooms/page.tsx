@@ -103,28 +103,28 @@ export default function RoomsPage() {
     };
 
     return (
-        <div className="min-h-screen p-8">
+        <div className="min-h-screen p-8 gradient-bg">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-12">
                     <Link href="/">
-                        <Button variant="ghost" className="mb-4 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all">
-                            <ArrowLeft className="w-4 h-4 mr-2" />
+                        <Button variant="ghost" className="mb-6 glass-subtle text-slate-300 hover:text-white border border-slate-700/30 hover:border-slate-600/50 transition-all group">
+                            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                             <span className="font-semibold">Separa</span>
                             <span className="mx-2 text-slate-600">|</span>
                             <span>Home</span>
                         </Button>
                     </Link>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
-                            <h1 className="text-4xl font-bold text-white mb-2">Rooms</h1>
-                            <p className="text-slate-400">Manage your video conferencing rooms</p>
+                            <h1 className="text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">Rooms</h1>
+                            <p className="text-slate-400 text-lg">Manage your video conferencing rooms</p>
                         </div>
 
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            className="bg-primary hover:bg-primary/90 text-white"
+                            className="glass-button text-white font-semibold premium-glow"
                         >
                             <Plus className="w-5 h-5 mr-2" />
                             Create Room
@@ -135,34 +135,37 @@ export default function RoomsPage() {
                 {/* Rooms Grid */}
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        <div className="glass-card rounded-2xl p-8">
+                            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                        </div>
                     </div>
                 ) : rooms.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 animate-in fade-in zoom-in duration-500">
-                        <div className="glass rounded-2xl p-12 max-w-lg w-full text-center border-slate-700/50 shadow-2xl">
-                            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                                <Video className="w-10 h-10 text-primary" />
+                    <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
+                        <div className="glass-card rounded-3xl p-12 max-w-lg w-full text-center frosted-edge shimmer">
+                            <div className="mx-auto w-24 h-24 glass-subtle rounded-2xl flex items-center justify-center mb-8 pulse-glow">
+                                <Video className="w-12 h-12 text-primary" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-3">No rooms yet</h3>
-                            <p className="text-slate-400 mb-8 text-lg">Create your first room to get started with secure video conferencing.</p>
+                            <h3 className="text-3xl font-bold text-white mb-4">No rooms yet</h3>
+                            <p className="text-slate-300 mb-10 text-lg leading-relaxed">Create your first room to get started with secure video conferencing.</p>
                             <Button
                                 onClick={() => setShowCreateModal(true)}
-                                className="bg-primary hover:bg-primary/90 text-white h-12 px-8 text-lg shadow-lg hover:shadow-primary/20 transition-all hover:scale-105"
+                                className="glass-button text-white h-14 px-10 text-lg font-semibold premium-glow hover:scale-105 transition-transform"
                             >
                                 <Plus className="w-6 h-6 mr-2" />
-                                Create Room
+                                Create Your First Room
                             </Button>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {rooms.map((room) => (
-                            <RoomCard
-                                key={room.id}
-                                room={room}
-                                onDelete={handleDeleteRoom}
-                                onToggleLock={handleToggleLock}
-                            />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+                        {rooms.map((room, index) => (
+                            <div key={room.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
+                                <RoomCard
+                                    room={room}
+                                    onDelete={handleDeleteRoom}
+                                    onToggleLock={handleToggleLock}
+                                />
+                            </div>
                         ))}
                     </div>
                 )}

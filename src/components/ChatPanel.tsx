@@ -87,7 +87,7 @@ export default function ChatPanel({
     <>
       {/* Backdrop for mobile */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[55] md:hidden"
+        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[55] md:hidden animate-fade-in"
         onClick={onClose}
       />
 
@@ -96,18 +96,19 @@ export default function ChatPanel({
         className={`
           fixed right-0 top-0 bottom-0 z-[60]
           w-full md:w-96
-          glass-strong border-l border-slate-700/50 shadow-2xl
+          glass-panel shadow-2xl
           flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700/50 bg-slate-900/50">
-          <h3 className="font-bold text-white flex items-center gap-2 text-lg">
-            💬 Chat
+        <div className="flex items-center justify-between p-5 border-b border-slate-700/50 glass-strong">
+          <h3 className="font-bold text-white flex items-center gap-3 text-lg">
+            <span className="text-2xl">💬</span>
+            <span>Chat</span>
             {messages.length > 0 && (
-              <span className="text-xs bg-gradient-to-r from-primary to-emerald-600 text-white px-2.5 py-1 rounded-full font-semibold shadow-lg">
+              <span className="text-xs glass-button px-3 py-1.5 rounded-full font-bold shadow-lg">
                 {messages.length}
               </span>
             )}
@@ -116,21 +117,21 @@ export default function ChatPanel({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+            className="text-slate-400 hover:text-white glass-subtle transition-all"
           >
             <X className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-slate-900/30 to-transparent">
+        <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar bg-gradient-to-b from-slate-900/20 to-transparent">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-600/20 flex items-center justify-center mb-4 pulse-glow">
-                <span className="text-4xl">💬</span>
+              <div className="w-24 h-24 rounded-2xl glass-card flex items-center justify-center mb-6 pulse-glow frosted-edge">
+                <span className="text-5xl">💬</span>
               </div>
-              <p className="text-slate-300 text-base font-semibold">No messages yet</p>
-              <p className="text-slate-500 text-sm mt-1">Start the conversation!</p>
+              <p className="text-slate-200 text-lg font-bold mb-2">No messages yet</p>
+              <p className="text-slate-400 text-sm">Start the conversation!</p>
             </div>
           ) : (
             <>
@@ -138,18 +139,19 @@ export default function ChatPanel({
                 <div
                   key={msg.id}
                   className={`
-                    p-3 rounded-xl border shadow-lg
+                    p-4 rounded-xl glass-card border shadow-lg
                     ${msg.userId === userId ? 'ml-8' : 'mr-8'}
                     ${getMessageColor(msg.gender)}
                     animate-slide-up
+                    hover:scale-[1.02] transition-transform
                   `}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm font-bold ${getTextColor(msg.gender)}`}>
                       {msg.userId === userId ? 'You' : msg.userName}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">
+                    <span className="text-xs text-slate-400 font-medium glass-subtle px-2 py-0.5 rounded">
                       {new Date(msg.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -165,26 +167,26 @@ export default function ChatPanel({
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
-          <form onSubmit={handleSendMessage} className="flex gap-2 mb-2">
+        <div className="p-5 border-t border-slate-700/50 glass-strong">
+          <form onSubmit={handleSendMessage} className="flex gap-3 mb-3">
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-primary transition-all"
+              className="flex-1 glass-input text-white placeholder:text-slate-400 h-12 text-sm"
               maxLength={500}
             />
             <Button
               type="submit"
               disabled={!inputMessage.trim()}
-              className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white font-semibold transition-all hover:scale-105 shadow-lg"
+              className="glass-button text-white font-semibold transition-all hover:scale-105 shadow-lg w-12 h-12"
               size="icon"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             </Button>
           </form>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-            <span>💡</span>
+          <p className="text-xs text-slate-400 flex items-center gap-2 glass-subtle p-2 rounded-lg">
+            <span className="text-base">💡</span>
             <span>Chat messages are local only. Real-time sync coming soon!</span>
           </p>
         </div>
