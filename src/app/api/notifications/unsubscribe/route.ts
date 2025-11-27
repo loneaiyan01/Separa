@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Remove subscription from database
     await prisma.pushSubscription.delete({
       where: { endpoint }
-    }).catch(async (error) => {
+    }).catch(async (error: any) => {
       // Fallback to file-based storage
       console.warn('Prisma unavailable, using file-based storage:', error.message);
       

@@ -302,6 +302,5 @@ model PushSubscription {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
-  @@index([endpoint])
   @@map("push_subscriptions")
 }

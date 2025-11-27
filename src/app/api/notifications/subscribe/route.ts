@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         keys: subscription.keys,
         expirationTime: subscription.expirationTime || null,
       }
-    }).catch(async (error) => {
+    }).catch(async (error: any) => {
       // Fallback to file-based storage if Prisma fails
       console.warn('Prisma unavailable, using file-based storage:', error.message);
       
