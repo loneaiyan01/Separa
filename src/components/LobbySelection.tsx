@@ -15,7 +15,7 @@ import { User, ShieldCheck, Crown, ArrowLeft, Lock, History, Plus } from "lucide
 import CreateRoomModal from "@/components/CreateRoomModal";
 
 interface LobbySelectionProps {
-    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string) => void;
+    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string) => Promise<void>;
     roomId?: string;
     roomName?: string;
 }
@@ -86,11 +86,13 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     }, [roomId]);
 
     // Step 1: Validate room ID and proceed to step 2
-    const handleContinueToStep2 = async () => {
+    const handleContinueToStep2 = async (roomIdOverride?: string) => {
         setError("");
         setIsLoading(true);
 
-        if (!enteredRoomID.trim()) {
+        const idToValidate = roomIdOverride || enteredRoomID;
+
+        if (!idToValidate.trim()) {
             setError("Please enter a Room ID.");
             setIsLoading(false);
             return;
@@ -98,7 +100,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
         // Validate that the room exists
         try {
-            const res = await fetch(`/api/rooms/${enteredRoomID.trim()}`);
+            const res = await fetch(`/api/rooms/${idToValidate.trim()}`);
 
             if (!res.ok) {
                 if (res.status === 404) {
@@ -115,10 +117,10 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             setRoomInfo({ locked: room.locked, name: room.name });
 
             // Check if there's a stored password from RoomCard
-            const storedPassword = sessionStorage.getItem(`room_${enteredRoomID.trim()}_password`);
+            const storedPassword = sessionStorage.getItem(`room_${idToValidate.trim()}_password`);
             if (storedPassword) {
                 setRoomPassword(storedPassword);
-                sessionStorage.removeItem(`room_${enteredRoomID.trim()}_password`);
+                sessionStorage.removeItem(`room_${idToValidate.trim()}_password`);
             }
 
             // Room exists, proceed to step 2
@@ -186,9 +188,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             setRoleStep('brother-joining');
             setIsLoading(true);
             try {
-                onJoin(displayName, 'male', false, roomPassword || undefined, actualRoomId);
-            } catch (err) {
-                setError("Failed to join. Please try again.");
+                await onJoin(displayName, 'male', false, roomPassword || undefined, actualRoomId);
+            } catch (err: any) {
+                setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
                 setRoleStep(null);
             }
@@ -217,9 +219,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                onJoin(displayName, 'host', true, roomPassword || undefined, actualRoomId);
-            } catch (err) {
-                setError("Failed to join. Please try again.");
+                await onJoin(displayName, 'host', true, roomPassword || undefined, actualRoomId);
+            } catch (err: any) {
+                setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
             }
         } else if (roleStep === 'sister-password') {
@@ -229,9 +231,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId);
-            } catch (err) {
-                setError("Failed to join. Please try again.");
+                await onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId);
+            } catch (err: any) {
+                setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
             }
         }
@@ -351,7 +353,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                 </div>
 
                                 <Button
-                                    onClick={handleContinueToStep2}
+                                    onClick={() => handleContinueToStep2()}
                                     className="glass-button premium-glow w-full h-12 md:h-14 text-white font-semibold transition-all hover:scale-[1.02] active:micro-bounce"
                                     disabled={!enteredRoomID.trim() || isLoading}
                                 >
@@ -394,10 +396,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                                     key={room.id}
                                                     onClick={async () => {
                                                         setEnteredRoomID(room.id);
-                                                        // Small delay to ensure state is updated
-                                                        setTimeout(() => {
-                                                            handleContinueToStep2();
-                                                        }, 100);
+                                                        handleContinueToStep2(room.id);
                                                     }}
                                                     className="glass-subtle w-full text-left px-3 py-2 rounded-lg transition-all hover:scale-[1.01] border border-slate-700/30 hover:border-emerald-500/30 group animate-slide-up"
                                                     style={{ animationDelay: `${index * 0.05}s` }}
@@ -441,6 +440,44 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                     </div>
                                 )}
 
+                                {/* Room Info & Share Link */}
+                                <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 backdrop-blur-sm mb-6">
+                                    <div className="flex flex-col gap-3">
+                                        <div>
+                                            <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Room ID</p>
+                                            <div className="flex items-center gap-2">
+                                                <code className="text-emerald-400 font-mono text-lg font-bold tracking-wide select-all">
+                                                    {displayRoomID}
+                                                </code>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
+                                            <Button
+                                                onClick={() => {
+                                                    const url = window.location.href.includes('?room=')
+                                                        ? window.location.href
+                                                        : `${window.location.origin}/?room=${displayRoomID}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    // Could add a toast here, but for now button feedback is enough
+                                                    const btn = document.getElementById('copy-link-btn');
+                                                    if (btn) {
+                                                        const originalText = btn.innerText;
+                                                        btn.innerText = 'Copied!';
+                                                        setTimeout(() => btn.innerText = originalText, 2000);
+                                                    }
+                                                }}
+                                                variant="outline"
+                                                size="sm"
+                                                id="copy-link-btn"
+                                                className="w-full text-xs h-8 border-slate-600 text-slate-300 hover:text-white hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all"
+                                            >
+                                                Copy Invite Link
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <label htmlFor="displayName" className="text-sm font-medium text-slate-300">
@@ -459,8 +496,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                         </div>
                                     </div>
 
-                                    {/* Room Password (if room requires it) */}
-                                    {(roomId || enteredRoomID) && (
+                                    {/* Room Password (only if room requires it) */}
+                                    {(roomId || enteredRoomID) && roomInfo?.locked && (
                                         <div className="space-y-2">
                                             <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
                                                 Room Password

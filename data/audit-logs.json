@@ -441,5 +441,335 @@
     },
     "id": "780b9fb1a1714df4",
     "timestamp": 1764268445715
+  },
+  {
+    "roomId": "c7e9f62b910eb006",
+    "action": "participant_joined",
+    "actorName": "aaa",
+    "actorIdentity": "aaa",
+    "details": "aaa joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "09e06d61dc326a51",
+    "timestamp": 1764269831308
+  },
+  {
+    "roomId": "1aca48fa330a97dd",
+    "action": "participant_joined",
+    "actorName": "Dd",
+    "actorIdentity": "Dd",
+    "details": "Dd joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "host",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "2de3e0efde11bb6b",
+    "timestamp": 1764270164333
+  },
+  {
+    "roomId": "72ffecfe051c5636",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Test(28/11)\" created with template: mixed-host-required",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "mixed-host-required",
+      "locked": true,
+      "hasSessionPassword": false
+    },
+    "id": "9c1c4612269defa7",
+    "timestamp": 1764330961687
+  },
+  {
+    "roomId": "e5205a3c5ecbe9dc",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Test Room\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "c4b6bf4013adda03",
+    "timestamp": 1764331154109
+  },
+  {
+    "roomId": "0eafc77f3891db49",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Test233\" created with template: mixed-host-required",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "mixed-host-required",
+      "locked": true,
+      "hasSessionPassword": false
+    },
+    "id": "a9bb8fdf52ca6ae4",
+    "timestamp": 1764332232953
+  },
+  {
+    "roomId": "0eafc77f3891db49",
+    "action": "participant_joined",
+    "actorName": "Aiyan",
+    "actorIdentity": "Aiyan",
+    "details": "Aiyan joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "host",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "cca2068fcd2f1f09",
+    "timestamp": 1764332262956
+  },
+  {
+    "roomId": "0eafc77f3891db49",
+    "action": "participant_joined",
+    "actorName": "Aa",
+    "actorIdentity": "Aa",
+    "details": "Aa joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "59ff8661cc24c9ef",
+    "timestamp": 1764332386991
+  },
+  {
+    "roomId": "0eafc77f3891db49",
+    "action": "participant_joined",
+    "actorName": "AA",
+    "actorIdentity": "AA",
+    "details": "AA joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "c6447843993e4835",
+    "timestamp": 1764332477365
+  },
+  {
+    "roomId": "27de0a2ac75fdf9b",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Test Room 123\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "ddd99e362af92209",
+    "timestamp": 1764332572639
+  },
+  {
+    "roomId": "0eafc77f3891db49",
+    "action": "participant_joined",
+    "actorName": "AA",
+    "actorIdentity": "AA",
+    "details": "AA joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "b924783c0a2eb72c",
+    "timestamp": 1764332799568
+  },
+  {
+    "roomId": "254621d8678a2ef9",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"1Test\" created with template: open",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "open",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "d0c853e9614e7880",
+    "timestamp": 1764332827119
+  },
+  {
+    "roomId": "254621d8678a2ef9",
+    "action": "participant_joined",
+    "actorName": "Aiyan",
+    "actorIdentity": "Aiyan",
+    "details": "Aiyan joined as female",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "female",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "4d7f53df1f1a6e77",
+    "timestamp": 1764332842921
+  },
+  {
+    "roomId": "df19e5ca90fd2975",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"2Test\" created with template: mixed-host-required",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "mixed-host-required",
+      "locked": true,
+      "hasSessionPassword": false
+    },
+    "id": "b660dc91dff5c488",
+    "timestamp": 1764332868998
+  },
+  {
+    "roomId": "df19e5ca90fd2975",
+    "action": "participant_joined",
+    "actorName": "Aa",
+    "actorIdentity": "Aa",
+    "details": "Aa joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "1d7d0b7920e894c8",
+    "timestamp": 1764332881195
+  },
+  {
+    "roomId": "df19e5ca90fd2975",
+    "action": "participant_joined",
+    "actorName": "aa",
+    "details": "Failed login attempt - incorrect password",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "incorrect_password"
+    },
+    "id": "2a5d67810e9e6348",
+    "timestamp": 1764332888505
+  },
+  {
+    "roomId": "df19e5ca90fd2975",
+    "action": "participant_joined",
+    "actorName": "aaa",
+    "actorIdentity": "aaa",
+    "details": "aaa joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "host",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "33243d3aa6041330",
+    "timestamp": 1764333053130
+  },
+  {
+    "roomId": "051ad12d500263f6",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"Locked Room Test\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": true,
+      "hasSessionPassword": false
+    },
+    "id": "2bcbd26a1785f41e",
+    "timestamp": 1764333201377
+  },
+  {
+    "roomId": "051ad12d500263f6",
+    "action": "participant_joined",
+    "actorName": "Test User",
+    "details": "Failed login attempt - incorrect password",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "incorrect_password"
+    },
+    "id": "019f74eccf83aad8",
+    "timestamp": 1764333237527
+  },
+  {
+    "roomId": "051ad12d500263f6",
+    "action": "participant_joined",
+    "actorName": "Test User",
+    "details": "Failed login attempt - incorrect password",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "incorrect_password"
+    },
+    "id": "837ccb3ebccd92f0",
+    "timestamp": 1764333347987
+  },
+  {
+    "roomId": "df19e5ca90fd2975",
+    "action": "participant_joined",
+    "actorName": "qq",
+    "actorIdentity": "qq",
+    "details": "qq joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "cacc0febb6a57cfb",
+    "timestamp": 1764333364983
+  },
+  {
+    "roomId": "c4c8adfc6da365df",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"3test\" created with template: sisters-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "sisters-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "295708ca08188df0",
+    "timestamp": 1764333573160
+  },
+  {
+    "roomId": "492b6de70269dd7b",
+    "action": "room_created",
+    "actorName": "anonymous",
+    "details": "Room \"No Password Room\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "95de211b24066992",
+    "timestamp": 1764333807463
+  },
+  {
+    "roomId": "492b6de70269dd7b",
+    "action": "participant_joined",
+    "actorName": "Verifier",
+    "actorIdentity": "Verifier",
+    "details": "Verifier joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "312947043219570d",
+    "timestamp": 1764333837324
   }
 ]

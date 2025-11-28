@@ -269,5 +269,265 @@
     },
     "blockedIps": [],
     "allowedIps": []
+  },
+  {
+    "id": "72ffecfe051c5636",
+    "name": "Test(28/11)",
+    "description": "",
+    "template": "mixed-host-required",
+    "locked": true,
+    "password": "4a823118b9ba8baa2f47489c0716f52755368e3e3c2c26d60736ccfa1bb21b5e",
+    "creator": "anonymous",
+    "createdAt": 1764330961681,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": true,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "e5205a3c5ecbe9dc",
+    "name": "Test Room",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764331154106,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "0eafc77f3891db49",
+    "name": "Test233",
+    "description": "",
+    "template": "mixed-host-required",
+    "locked": true,
+    "password": "4740ae6347b0172c01254ff55bae5aff5199f4446e7f6d643d40185b3f475145",
+    "creator": "anonymous",
+    "createdAt": 1764332232951,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": true,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "27de0a2ac75fdf9b",
+    "name": "Test Room 123",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764332572626,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "254621d8678a2ef9",
+    "name": "1Test",
+    "description": "",
+    "template": "open",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764332827118,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "df19e5ca90fd2975",
+    "name": "2Test",
+    "description": "",
+    "template": "mixed-host-required",
+    "locked": true,
+    "password": "d5ce2b19fbda14a25deac948154722f33efd37b369a32be8f03ec2be8ef7d3a5",
+    "creator": "anonymous",
+    "createdAt": 1764332868995,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "female",
+        "host"
+      ],
+      "requireHost": true,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "051ad12d500263f6",
+    "name": "Locked Room Test",
+    "description": "",
+    "template": "brothers-only",
+    "locked": true,
+    "password": "e1edd420c38b62bb13b28db0972bcb7d2d5b889b39241e8bc5542c3bd6b5e308",
+    "creator": "anonymous",
+    "createdAt": 1764333201373,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "c4c8adfc6da365df",
+    "name": "3test",
+    "description": "testing 3",
+    "template": "sisters-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764333573157,
+    "settings": {
+      "allowedGenders": [
+        "female",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "492b6de70269dd7b",
+    "name": "No Password Room",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "anonymous",
+    "createdAt": 1764333807458,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]

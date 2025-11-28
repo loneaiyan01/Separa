@@ -50,11 +50,9 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
         logConnectionEvent('Disconnected from room', { roomName });
         clearSessionState(roomName);
 
-        if (reconnectAttempts >= maxReconnectAttempts) {
-            alert('Connection lost. Returning to lobby.');
-            onLeave();
-        }
-    }, [onLeave, roomName, reconnectAttempts]);
+        // Always leave the room when disconnected to return to lobby
+        onLeave();
+    }, [onLeave, roomName]);
 
     const handleError = useCallback((error: Error) => {
         console.error('LiveKit error:', error);
@@ -66,17 +64,17 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
         if (!networkStatus.isOnline) {
             return { width: 320, height: 240, frameRate: 10 };
         }
-        
+
         if (networkStatus.isSlow) {
             return { width: 480, height: 360, frameRate: 15 };
         }
-        
+
         if (networkStatus.effectiveType === '3g') {
             return { width: 640, height: 480, frameRate: 20 };
         }
-        
+
         // 4G or better
-        return isMobile 
+        return isMobile
             ? { width: 1280, height: 720, frameRate: 30 }
             : { width: 1920, height: 1080, frameRate: 30 };
     };
@@ -112,7 +110,7 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
                 networkStatus={networkStatus}
             />
             <RoomAudioRenderer />
-            
+
             {/* Mobile-optimized control bar */}
             <div className={`fixed ${isMobile ? 'bottom-4' : 'bottom-6'} left-1/2 -translate-x-1/2 z-50 glass-strong rounded-full ${isMobile ? 'px-2 py-1.5' : 'px-4 py-2'} shadow-2xl border border-slate-700/50 animate-slide-up`}>
                 <ControlBar variation="minimal" controls={{ chat: false, screenShare: !isMobile }} />
@@ -375,28 +373,29 @@ function RoomContent({
         try {
             e?.stopPropagation();
             e?.preventDefault();
-            
+
             // Close modal first to prevent UI issues
             setShowLeaveConfirm(false);
-            
+
             // Disconnect from LiveKit room properly
             if (room) {
                 await room.disconnect(true); // Force disconnect
             }
-            
+
             clearSessionState(roomName);
-            
+
             // Small delay to allow cleanup
             setTimeout(() => {
                 onLeave();
-                router.push('/');
+                // Force full page reload to clear URL query parameters and reset state
+                window.location.href = '/';
             }, 150);
         } catch (error) {
             console.error('Error leaving room:', error);
             // Force leave even if there's an error
             clearSessionState(roomName);
             onLeave();
-            router.push('/');
+            window.location.href = '/';
         }
     };
 
@@ -486,11 +485,11 @@ function RoomContent({
 
             {/* Leave Confirmation Dialog */}
             {showLeaveConfirm && (
-                <div 
+                <div
                     className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
                     onClick={handleCancelLeave}
                 >
-                    <div 
+                    <div
                         className="glass-strong rounded-2xl p-8 max-w-md w-full border border-slate-700/50 shadow-2xl animate-scale-in"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -542,7 +541,7 @@ function RoomContent({
 
             {/* Audit Logs Modal */}
             {showAuditLogs && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-h-[80vh] flex flex-col">
                         <div className="flex items-center justify-between p-6 border-b border-slate-800">
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">

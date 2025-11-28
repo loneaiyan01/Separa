@@ -42,7 +42,7 @@ function HomeContent() {
         try {
             // Use the explicitly passed room ID, or fall back to currentRoomId
             const actualRoomId = enteredRoomId || currentRoomId;
-            
+
             const res = await fetch('/api/token', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -57,8 +57,7 @@ function HomeContent() {
 
             if (!res.ok) {
                 const error = await res.json();
-                alert(error.error || 'Failed to join room');
-                return;
+                throw new Error(error.error || 'Failed to join room');
             }
 
             const data = await res.json();
@@ -72,9 +71,10 @@ function HomeContent() {
             } else {
                 setRoomName(roomDisplayName || 'separa-demo');
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Failed to join room');
+            // Re-throw the error so the caller can handle it (e.g., stop loading spinner)
+            throw e;
         }
     };
 
