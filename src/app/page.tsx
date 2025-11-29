@@ -1,117 +1,61 @@
-"use client"
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import LobbySelection from '@/components/LobbySelection';
-import VideoRoom from '@/components/VideoRoom';
-import PWAInstallPrompt from '@/components/PWAInstallPrompt';
-import NotificationPrompt from '@/components/NotificationPrompt';
-import { Gender } from '@/types';
+"use client";
 
-function HomeContent() {
-    const searchParams = useSearchParams();
-    const roomId = searchParams.get('room');
+import dynamic from "next/dynamic";
+import { Shield } from "lucide-react";
+import ScrambleText from "@/components/landing/ScrambleText";
+import TerminalWidget from "@/components/landing/TerminalWidget";
+import GlassVault from "@/components/landing/GlassVault";
+import Spotlight from "@/components/landing/Spotlight";
+import ParallaxEffect from "@/components/landing/ParallaxEffect";
 
-    const [token, setToken] = useState('');
-    const [userGender, setUserGender] = useState<Gender>('male');
-    const [isHost, setIsHost] = useState(false);
-    const [roomName, setRoomName] = useState('');
-    const [currentRoomId, setCurrentRoomId] = useState<string | undefined>(undefined);
-    const [roomDisplayName, setRoomDisplayName] = useState<string | undefined>(undefined);
-
-    // Fetch room details if roomId is in URL
-    useEffect(() => {
-        if (roomId) {
-            fetchRoomDetails(roomId);
-        }
-    }, [roomId]);
-
-    const fetchRoomDetails = async (id: string) => {
-        try {
-            const res = await fetch(`/api/rooms/${id}`);
-            if (res.ok) {
-                const room = await res.json();
-                setRoomDisplayName(room.name);
-                setCurrentRoomId(id);
-            }
-        } catch (error) {
-            console.error('Error fetching room details:', error);
-        }
-    };
-
-    const handleJoin = async (name: string, gender: Gender, host: boolean, roomPassword?: string, enteredRoomId?: string) => {
-        try {
-            // Use the explicitly passed room ID, or fall back to currentRoomId
-            const actualRoomId = enteredRoomId || currentRoomId;
-
-            const res = await fetch('/api/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    roomId: actualRoomId,
-                    participantName: name,
-                    gender: gender,
-                    isHost: host,
-                    roomPassword: roomPassword,
-                }),
-            });
-
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.error || 'Failed to join room');
-            }
-
-            const data = await res.json();
-            setToken(data.token);
-            setUserGender(gender);
-            setIsHost(host);
-
-            // Set room name from response or use display name
-            if (data.room) {
-                setRoomName(data.room.name);
-            } else {
-                setRoomName(roomDisplayName || 'separa-demo');
-            }
-        } catch (e: any) {
-            console.error(e);
-            // Re-throw the error so the caller can handle it (e.g., stop loading spinner)
-            throw e;
-        }
-    };
-
-    const handleLeave = () => {
-        setToken('');
-        setIsHost(false);
-    };
-
-    if (token) {
-        return (
-            <VideoRoom
-                token={token}
-                userGender={userGender}
-                isHost={isHost}
-                onLeave={handleLeave}
-                roomName={roomName}
-            />
-        );
-    }
-
-    return (
-        <>
-            <LobbySelection
-                onJoin={handleJoin}
-                roomId={currentRoomId}
-                roomName={roomDisplayName}
-            />
-            <PWAInstallPrompt />
-            <NotificationPrompt />
-        </>
-    );
-}
+const ParticleGlobe = dynamic(() => import("@/components/landing/ParticleGlobe"), { ssr: false });
 
 export default function Home() {
     return (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-            <HomeContent />
-        </Suspense>
+        <main className="min-h-screen w-full bg-[#020617] text-slate-200 overflow-hidden flex flex-col md:flex-row relative">
+            {/* Spotlight Effect */}
+            <Spotlight />
+
+            {/* Parallax Effect */}
+            <ParallaxEffect />
+
+            {/* Left Section: The Narrative (60%) */}
+            <section className="relative w-full md:w-[60%] h-[50vh] md:h-screen flex flex-col justify-center px-8 md:px-20 z-10">
+                {/* Background Globe - Moves slowly opposite (data-speed="-1") */}
+                <div className="absolute inset-0 z-0" data-speed="-1">
+                    <ParticleGlobe />
+                </div>
+
+                {/* Content - Left Aligned - Moves slightly with mouse (data-speed="2") */}
+                <div className="relative z-10 max-w-[650px] flex flex-col items-start" data-speed="2">
+                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight text-white">
+                        <ScrambleText text="Privacy." className="block text-cyan-400" />
+                        <ScrambleText text="Segregated." className="block" />
+                        <ScrambleText text="Secured." className="block" />
+                    </h1>
+
+                    <p className="text-lg md:text-xl text-slate-400 max-w-lg mb-8 leading-relaxed">
+                        End-to-end encrypted video conferencing designed for gender-segregated environments.
+                        Experience the future of modest communication.
+                    </p>
+                </div>
+
+                {/* Terminal Widget - Anchored to bottom-left */}
+                <TerminalWidget />
+            </section>
+
+            {/* The Bridge (Divider) */}
+            <div className="hidden md:block absolute left-[60%] top-[10%] bottom-[10%] w-[1px] bg-gradient-to-b from-transparent via-[rgba(0,240,255,0.5)] to-transparent z-20">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#020617] p-[10px] rounded-full border border-[rgba(0,240,255,0.3)] text-[#00F0FF]">
+                    <Shield className="w-5 h-5" />
+                </div>
+            </div>
+
+            {/* Right Section: The Vault (40%) */}
+            <section className="relative w-full md:w-[40%] h-[50vh] md:h-screen flex items-center justify-center bg-[linear-gradient(225deg,rgba(30,41,59,0.4)_0%,rgba(2,6,23,0)_100%)] backdrop-blur-[10px] z-10">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+                <GlassVault />
+            </section>
+        </main>
     );
 }

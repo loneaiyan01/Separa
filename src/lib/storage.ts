@@ -287,15 +287,26 @@ let roomsCache: Room[] | null = null;
 let auditLogsCache: AuditLog[] | null = null;
 let isFileSystemWritable = true; // Assume writable initially
 
+// Helper for debug logging
+async function logDebug(message: string) {
+    try {
+        await fs.appendFile(path.join(process.cwd(), 'debug.log'), message + '\n');
+    } catch { }
+}
+
 // Ensure data directory exists
 async function ensureDataDir(): Promise<boolean> {
-    if (!isFileSystemWritable) return false;
+    if (!isFileSystemWritable) {
+        await logDebug('ensureDataDir: File system marked as not writable');
+        return false;
+    }
 
     try {
         await fs.access(DATA_DIR);
         return true;
     } catch {
         try {
+            await logDebug('ensureDataDir: Creating data directory at ' + DATA_DIR);
             await fs.mkdir(DATA_DIR, { recursive: true });
             return true;
         } catch (error: any) {
@@ -324,7 +335,7 @@ export async function getAllRooms(): Promise<Room[]> {
         return roomsCache!;
     } catch (error: any) {
         // If file doesn't exist or we can't read it (Vercel), use defaults
-        console.log('Using default rooms (file storage unavailable or empty)');
+        await logDebug('Using default rooms (file storage unavailable or empty). Error: ' + error.message);
         roomsCache = [...DEFAULT_ROOMS];
         return roomsCache;
     }
@@ -335,19 +346,28 @@ async function saveRooms(rooms: Room[]): Promise<void> {
     // Update cache first
     roomsCache = rooms;
 
-    if (!isFileSystemWritable) return;
+    if (!isFileSystemWritable) {
+        await logDebug('saveRooms: File system not writable, skipping write');
+        return;
+    }
 
     try {
         const dirExists = await ensureDataDir();
-        if (!dirExists) return;
+        if (!dirExists) {
+            await logDebug('saveRooms: Data dir does not exist');
+            return;
+        }
 
+        await logDebug('saveRooms: Writing to ' + ROOMS_FILE);
         await fs.writeFile(ROOMS_FILE, JSON.stringify(rooms, null, 2), 'utf-8');
+        await logDebug('saveRooms: Write successful');
     } catch (error: any) {
         if (error.code === 'EROFS') {
             isFileSystemWritable = false;
             console.warn('Detected read-only file system during write. Disabling future writes.');
         } else {
             console.warn('Failed to save rooms to file:', error);
+            await logDebug('saveRooms: Failed to save: ' + error.message);
         }
     }
 }
@@ -360,6 +380,8 @@ export async function getRoomById(id: string): Promise<Room | null> {
 
 // Create a new room
 export async function createRoom(room: Room): Promise<Room> {
+    // Force refresh from disk to ensure we have latest data
+    roomsCache = null;
     const rooms = await getAllRooms();
 
     // Check if room ID already exists
@@ -374,6 +396,8 @@ export async function createRoom(room: Room): Promise<Room> {
 
 // Update a room
 export async function updateRoom(id: string, updates: Partial<Room>): Promise<Room | null> {
+    // Force refresh from disk
+    roomsCache = null;
     const rooms = await getAllRooms();
     const index = rooms.findIndex(room => room.id === id);
 
@@ -388,6 +412,8 @@ export async function updateRoom(id: string, updates: Partial<Room>): Promise<Ro
 
 // Delete a room
 export async function deleteRoom(id: string): Promise<boolean> {
+    // Force refresh from disk
+    roomsCache = null;
     const rooms = await getAllRooms();
     const filteredRooms = rooms.filter(room => room.id !== id);
 

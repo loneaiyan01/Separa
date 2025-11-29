@@ -48,7 +48,7 @@ export default function ChatPanel({
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!inputMessage.trim()) return;
 
     const newMessage: ChatMessage = {
