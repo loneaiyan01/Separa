@@ -31,6 +31,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [displayName, setDisplayName] = useState("");
 
     // Role/password state
+    const [selectedRole, setSelectedRole] = useState<'brother' | 'sister' | 'host'>('brother');
     const [roleStep, setRoleStep] = useState<RoleStep | null>(null);
     const [hostPassword, setHostPassword] = useState("");
     const [sisterPassword, setSisterPassword] = useState("");
@@ -168,8 +169,14 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         }
     };
 
-    // Step 2: Handle role selection
-    const handleRoleSelect = async (role: 'brother' | 'sister' | 'host') => {
+    // Handle initial role selection (just updates state)
+    const handleRoleSelectionChange = (role: 'brother' | 'sister' | 'host') => {
+        setSelectedRole(role);
+        setError("");
+    };
+
+    // Handle proceeding from role selection
+    const handleProceed = async () => {
         setError("");
 
         if (!displayName.trim()) {
@@ -184,7 +191,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             saveToHistory(actualRoomId, roomInfo?.name || 'Unknown Room');
         }
 
-        if (role === 'brother') {
+        if (selectedRole === 'brother') {
             setRoleStep('brother-joining');
             setIsLoading(true);
             try {
@@ -194,9 +201,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 setIsLoading(false);
                 setRoleStep(null);
             }
-        } else if (role === 'sister') {
+        } else if (selectedRole === 'sister') {
             setRoleStep('sister-password');
-        } else if (role === 'host') {
+        } else if (selectedRole === 'host') {
             setRoleStep('host-password');
         }
     };
@@ -209,7 +216,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         setIsLoading(true);
 
         const hostPwd = process.env.NEXT_PUBLIC_HOST_PASSWORD;
-        const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD;
+        // Fallback to 'sister' if env var is missing, for smoother dev experience
+        const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD || 'sister';
         const actualRoomId = roomId || enteredRoomID;
 
         if (roleStep === 'host-password') {
@@ -525,13 +533,13 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                             {/* Identity Grid */}
                             <div className="identity-grid">
                                 {/* Brother Option */}
-                                <label className={`identity-card male ${displayName.trim() ? '' : 'opacity-50 cursor-not-allowed'}`}>
+                                <label className={`identity-card male ${displayName.trim() ? '' : 'opacity-50 cursor-not-allowed'} ${selectedRole === 'brother' ? 'ring-2 ring-emerald-500' : ''}`}>
                                     <input
                                         type="radio"
                                         name="role"
                                         value="brother"
-                                        checked={roleStep === 'brother-joining' || (!roleStep && true)} // Default to brother visually if nothing selected
-                                        onChange={() => handleRoleSelect("brother")}
+                                        checked={selectedRole === 'brother'}
+                                        onChange={() => handleRoleSelectionChange("brother")}
                                         disabled={!displayName.trim()}
                                     />
                                     <div className="flex flex-col items-center">
@@ -544,13 +552,13 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                 </label>
 
                                 {/* Sister Option */}
-                                <label className={`identity-card female ${displayName.trim() ? '' : 'opacity-50 cursor-not-allowed'}`}>
+                                <label className={`identity-card female ${displayName.trim() ? '' : 'opacity-50 cursor-not-allowed'} ${selectedRole === 'sister' ? 'ring-2 ring-rose-500' : ''}`}>
                                     <input
                                         type="radio"
                                         name="role"
                                         value="sister"
-                                        checked={roleStep === 'sister-password'}
-                                        onChange={() => handleRoleSelect("sister")}
+                                        checked={selectedRole === 'sister'}
+                                        onChange={() => handleRoleSelectionChange("sister")}
                                         disabled={!displayName.trim()}
                                     />
                                     <div className="flex flex-col items-center">
@@ -563,11 +571,23 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                 </label>
                             </div>
 
+                            {/* Join Button */}
+                            <Button
+                                onClick={handleProceed}
+                                className={`w-full h-12 text-white font-semibold transition-all shadow-md mt-4 ${selectedRole === 'brother' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                                        selectedRole === 'sister' ? 'bg-rose-600 hover:bg-rose-700' :
+                                            'bg-slate-600 hover:bg-slate-700'
+                                    }`}
+                                disabled={!displayName.trim() || isLoading}
+                            >
+                                {isLoading ? 'Joining...' : `Join as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}`}
+                            </Button>
+
                             {/* Admin Link */}
                             <div className="admin-footer">
                                 <button
-                                    onClick={() => handleRoleSelect("host")}
-                                    className="admin-link hover:text-amber-400 transition-colors"
+                                    onClick={() => handleRoleSelectionChange("host")}
+                                    className={`admin-link hover:text-amber-400 transition-colors ${selectedRole === 'host' ? 'text-amber-400 font-bold' : ''}`}
                                     disabled={!displayName.trim()}
                                 >
                                     <Lock className="w-3 h-3" />

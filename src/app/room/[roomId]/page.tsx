@@ -80,7 +80,8 @@ export default function RoomPage() {
             setShowLobby(false);
         } catch (err) {
             console.error('Error joining room:', err);
-            setError(err instanceof Error ? err.message : 'Failed to join room');
+            // Re-throw the error so LobbySelection can handle it
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -167,7 +168,9 @@ export default function RoomPage() {
 
                 {error && (
                     <div className="glass-card rounded-2xl p-8 max-w-md w-full text-center">
-                        <h2 className="text-2xl font-bold text-red-400 mb-4">Room Not Found</h2>
+                        <h2 className="text-2xl font-bold text-red-400 mb-4">
+                            {error === 'Room not found' ? 'Room Not Found' : 'Error'}
+                        </h2>
                         <p className="text-slate-300 mb-6">
                             {error === 'Room not found'
                                 ? 'This room doesn\'t exist or may have been deleted.'
@@ -190,7 +193,7 @@ export default function RoomPage() {
                     </div>
                 )}
 
-                {showLobby && roomData && (
+                {showLobby && roomData && !error && (
                     <div className="w-full max-w-[480px]">
                         <LobbySelection
                             onJoin={handleJoin}

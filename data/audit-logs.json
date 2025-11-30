@@ -1874,5 +1874,121 @@
     },
     "id": "f36c524c2ffe4517",
     "timestamp": 1764420150748
+  },
+  {
+    "roomId": "4d4ad196d3a721f5",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room f1b79204\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "1bfd8647827880b4",
+    "timestamp": 1764484562689
+  },
+  {
+    "roomId": "4d4ad196d3a721f5",
+    "action": "participant_joined",
+    "actorName": "ll",
+    "actorIdentity": "ll",
+    "details": "ll joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "d327d928930206e8",
+    "timestamp": 1764484586051
+  },
+  {
+    "roomId": "a0c257f6c2adb013",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 833473e1\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "72f43eeeb8d9af97",
+    "timestamp": 1764484590223
+  },
+  {
+    "roomId": "a0c257f6c2adb013",
+    "action": "participant_joined",
+    "actorName": "Aa",
+    "details": "Access denied - gender restriction (female not allowed in brothers only room)",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "gender_restriction",
+      "userGender": "female",
+      "template": "brothers-only"
+    },
+    "id": "3c3f54682e15377b",
+    "timestamp": 1764484605562
+  },
+  {
+    "roomId": "418a7019cb8bc726",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 38d2d496\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "07a39a0b5c0f66c4",
+    "timestamp": 1764484618182
+  },
+  {
+    "roomId": "418a7019cb8bc726",
+    "action": "participant_joined",
+    "actorName": "aa",
+    "details": "Access denied - gender restriction (female not allowed in brothers only room)",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "gender_restriction",
+      "userGender": "female",
+      "template": "brothers-only"
+    },
+    "id": "ff366839a197ce51",
+    "timestamp": 1764484628041
+  },
+  {
+    "roomId": "607c93238a431aad",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room ee4bdc46\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "a323c719bbc4588c",
+    "timestamp": 1764484848564
+  },
+  {
+    "roomId": "607c93238a431aad",
+    "action": "participant_joined",
+    "actorName": "hh",
+    "details": "Access denied - gender restriction (female not allowed in brothers only room)",
+    "ipAddress": "::1",
+    "metadata": {
+      "success": false,
+      "reason": "gender_restriction",
+      "userGender": "female",
+      "template": "brothers-only"
+    },
+    "id": "105a2271dac79daa",
+    "timestamp": 1764484860800
   }
 ]

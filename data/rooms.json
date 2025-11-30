@@ -2490,5 +2490,117 @@
     },
     "blockedIps": [],
     "allowedIps": []
+  },
+  {
+    "id": "4d4ad196d3a721f5",
+    "name": "Room f1b79204",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764484562633,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "a0c257f6c2adb013",
+    "name": "Room 833473e1",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764484590207,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "418a7019cb8bc726",
+    "name": "Room 38d2d496",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764484618165,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "607c93238a431aad",
+    "name": "Room ee4bdc46",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764484848546,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]
