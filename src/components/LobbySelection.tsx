@@ -310,21 +310,20 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             />
 
             <Card className="w-full max-w-md glass-strong glass-panel frosted-edge border-0 shadow-2xl p-6 md:p-10 animate-scale-in mx-auto">
-                <CardHeader className="text-center space-y-2 pb-6 px-0">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/30 to-emerald-600/30 rounded-2xl flex items-center justify-center mb-3 pulse-glow">
-                        <ShieldCheck className="w-10 h-10 text-primary" />
-                    </div>
-                    <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                        Separa
-                    </CardTitle>
-                    <CardDescription className="text-slate-300 text-base">
-                        {step === 1 ? (
-                            "Secure, gender‑segregated video conferencing."
-                        ) : (
-                            <span>Joining: <strong className="text-primary">{displayRoomName || displayRoomID}</strong></span>
-                        )}
-                    </CardDescription>
-                </CardHeader>
+                {/* Only show header on Step 1 */}
+                {step === 1 && (
+                    <CardHeader className="text-center space-y-2 pb-6 px-0">
+                        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary/30 to-emerald-600/30 rounded-2xl flex items-center justify-center mb-3 pulse-glow">
+                            <ShieldCheck className="w-10 h-10 text-primary" />
+                        </div>
+                        <CardTitle className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                            Separa
+                        </CardTitle>
+                        <CardDescription className="text-slate-300 text-base">
+                            Secure, gender‑segregated video conferencing.
+                        </CardDescription>
+                    </CardHeader>
+                )}
 
                 <CardContent className="space-y-5 px-0">
                     {/* Error Display */}
@@ -447,43 +446,25 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                 </div>
                             )}
 
-                            {/* Room Info & Share Link */}
-                            <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 backdrop-blur-sm mb-6">
-                                <div className="flex flex-col gap-3">
-                                    <div>
-                                        <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Room ID</p>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-emerald-400 font-mono text-lg font-bold tracking-wide select-all">
-                                                {displayRoomID}
-                                            </code>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
-                                        <Button
-                                            onClick={() => {
-                                                const url = `${window.location.origin}/room/${displayRoomID}`;
-                                                navigator.clipboard.writeText(url);
-                                                // Could add a toast here, but for now button feedback is enough
-                                                const btn = document.getElementById('copy-link-btn');
-                                                if (btn) {
-                                                    const originalText = btn.innerText;
-                                                    btn.innerText = 'Copied!';
-                                                    setTimeout(() => btn.innerText = originalText, 2000);
-                                                }
-                                            }}
-                                            variant="outline"
-                                            size="sm"
-                                            id="copy-link-btn"
-                                            className="w-full text-xs h-8 border-slate-600 text-slate-300 hover:text-white hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all"
-                                        >
-                                            Copy Invite Link
-                                        </Button>
+                            {/* Input Row: Room ID and Display Name Side-by-Side */}
+                            <div className="input-row">
+                                {/* Group 1: Room ID (Read Only) */}
+                                <div className="space-y-2">
+                                    <label htmlFor="roomIdDisplay" className="text-sm font-medium text-slate-300">
+                                        Room ID
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400 z-10" />
+                                        <Input
+                                            id="roomIdDisplay"
+                                            value={displayRoomID}
+                                            readOnly
+                                            className="glass-input w-full h-12 pl-10 pr-4 text-emerald-400 font-mono font-bold rounded-lg cursor-default"
+                                        />
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-4">
+                                {/* Group 2: Display Name */}
                                 <div className="space-y-2">
                                     <label htmlFor="displayName" className="text-sm font-medium text-slate-300">
                                         Display Name
@@ -500,33 +481,54 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                                         />
                                     </div>
                                 </div>
-
-                                {/* Room Password (only if room requires it) */}
-                                {(roomId || enteredRoomID) && roomInfo?.locked && (
-                                    <div className="space-y-2">
-                                        <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                            Room Password
-                                            {roomInfo?.locked && <span className="text-xs text-red-400 font-bold">(Required)</span>}
-                                            {!roomInfo?.locked && <span className="text-xs text-slate-500">(if required)</span>}
-                                        </label>
-                                        <div className="relative">
-                                            <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 z-10 ${roomInfo?.locked ? 'text-amber-400' : 'text-slate-400'}`} />
-                                            <Input
-                                                id="roomPassword"
-                                                type="password"
-                                                placeholder={roomInfo?.locked ? "Enter room password (required)" : "Enter room password"}
-                                                value={roomPassword}
-                                                onChange={(e) => setRoomPassword(e.target.value)}
-                                                className={`glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg ${roomInfo?.locked ? 'border-amber-500/50' : ''}`}
-                                                required={roomInfo?.locked}
-                                            />
-                                        </div>
-                                        {roomInfo?.locked && !roomPassword && (
-                                            <p className="text-xs text-amber-400">This room is locked and requires a password</p>
-                                        )}
-                                    </div>
-                                )}
                             </div>
+
+                            {/* Copy Invite Link Button */}
+                            <div className="mb-4">
+                                <Button
+                                    onClick={() => {
+                                        const url = `${window.location.origin}/room/${displayRoomID}`;
+                                        navigator.clipboard.writeText(url);
+                                        const btn = document.getElementById('copy-link-btn');
+                                        if (btn) {
+                                            const originalText = btn.innerText;
+                                            btn.innerText = 'Copied!';
+                                            setTimeout(() => btn.innerText = originalText, 2000);
+                                        }
+                                    }}
+                                    variant="outline"
+                                    size="sm"
+                                    id="copy-link-btn"
+                                    className="w-full text-xs h-8 border-slate-600 text-slate-300 hover:text-white hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all"
+                                >
+                                    Copy Invite Link
+                                </Button>
+                            </div>
+
+                            {/* Room Password (only if room requires it) */}
+                            {(roomId || enteredRoomID) && roomInfo?.locked && (
+                                <div className="space-y-2 mb-4">
+                                    <label htmlFor="roomPassword" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                                        Room Password
+                                        {roomInfo?.locked && <span className="text-xs text-red-400 font-bold">(Required)</span>}
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 z-10 ${roomInfo?.locked ? 'text-amber-400' : 'text-slate-400'}`} />
+                                        <Input
+                                            id="roomPassword"
+                                            type="password"
+                                            placeholder={roomInfo?.locked ? "Enter room password (required)" : "Enter room password"}
+                                            value={roomPassword}
+                                            onChange={(e) => setRoomPassword(e.target.value)}
+                                            className={`glass-input w-full h-12 pl-10 pr-4 text-white placeholder:text-slate-500 rounded-lg ${roomInfo?.locked ? 'border-amber-500/50' : ''}`}
+                                            required={roomInfo?.locked}
+                                        />
+                                    </div>
+                                    {roomInfo?.locked && !roomPassword && (
+                                        <p className="text-xs text-amber-400">This room is locked and requires a password</p>
+                                    )}
+                                </div>
+                            )}
 
                             <label className="text-sm font-medium text-slate-300 block mb-3">Select Your Identity</label>
 
@@ -575,8 +577,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                             <Button
                                 onClick={handleProceed}
                                 className={`w-full h-12 text-white font-semibold transition-all shadow-md mt-4 ${selectedRole === 'brother' ? 'bg-emerald-600 hover:bg-emerald-700' :
-                                        selectedRole === 'sister' ? 'bg-rose-600 hover:bg-rose-700' :
-                                            'bg-slate-600 hover:bg-slate-700'
+                                    selectedRole === 'sister' ? 'bg-rose-600 hover:bg-rose-700' :
+                                        'bg-slate-600 hover:bg-slate-700'
                                     }`}
                                 disabled={!displayName.trim() || isLoading}
                             >

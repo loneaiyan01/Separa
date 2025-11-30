@@ -868,17 +868,34 @@ body {
 
 /* Lobby Card - Optimized for Laptop Screens */
 .glass-card {
-  width: 480px !important;
+  width: 700px !important;
   max-width: 90vw;
-  padding: 40px 50px !important;
+  padding: 50px 60px !important;
   display: flex;
   flex-direction: column;
   gap: 24px;
   text-align: center;
+  justify-content: center;
 }
 
 .glass-card input {
   width: 100%;
+  margin-bottom: 24px;
+}
+
+/* Input Row - Side by Side Layout */
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+/* Identity Grid - Side by Side Cards */
+.identity-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
@@ -887,12 +904,14 @@ body {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px !important;
+  height: 140px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
 }
 

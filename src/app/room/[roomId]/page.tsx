@@ -113,8 +113,8 @@ export default function RoomPage() {
             {/* Parallax Effect */}
             <ParallaxEffect />
 
-            {/* Left Section: The Narrative (60%) */}
-            <section className="relative w-full md:w-[60%] h-[50vh] md:h-screen flex flex-col justify-center px-8 md:px-20 z-10">
+            {/* Left Section: The Narrative (40%) */}
+            <section className="relative w-full md:w-[40%] h-[50vh] md:h-screen flex flex-col justify-center px-8 md:px-12 z-10">
                 {/* Back Button */}
                 <button
                     onClick={() => router.push('/')}
@@ -131,7 +131,7 @@ export default function RoomPage() {
 
                 {/* Content - Left Aligned - Moves slightly with mouse (data-speed="2") */}
                 <div className="relative z-10 max-w-[650px] flex flex-col items-start" data-speed="2">
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight text-white">
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight text-white">
                         <ScrambleText text="Secure." className="block text-cyan-400" />
                         <ScrambleText text="Private." className="block" />
                         <ScrambleText text="Connected." className="block" />
@@ -149,14 +149,14 @@ export default function RoomPage() {
             </section>
 
             {/* The Bridge (Divider) */}
-            <div className="hidden md:block absolute left-[60%] top-[10%] bottom-[10%] w-[1px] bg-gradient-to-b from-transparent via-[rgba(0,240,255,0.5)] to-transparent z-20">
+            <div className="hidden md:block absolute left-[40%] top-[10%] bottom-[10%] w-[1px] bg-gradient-to-b from-transparent via-[rgba(0,240,255,0.5)] to-transparent z-20">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#020617] p-[10px] rounded-full border border-[rgba(0,240,255,0.3)] text-[#00F0FF]">
                     <Shield className="w-5 h-5" />
                 </div>
             </div>
 
-            {/* Right Section: The Lobby (40%) */}
-            <section className="relative w-full md:w-[40%] h-[50vh] md:h-screen flex items-center justify-center bg-[linear-gradient(225deg,rgba(30,41,59,0.4)_0%,rgba(2,6,23,0)_100%)] backdrop-blur-[10px] z-10 p-4">
+            {/* Right Section: The Lobby (60%) */}
+            <section className="relative w-full md:w-[60%] h-[50vh] md:h-screen flex items-center justify-center bg-[linear-gradient(225deg,rgba(30,41,59,0.4)_0%,rgba(2,6,23,0)_100%)] backdrop-blur-[10px] z-10 p-4">
                 <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
 
                 {loading && !roomData && (
