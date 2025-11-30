@@ -38,9 +38,11 @@ interface VideoRoomProps {
     isHost: boolean;
     onLeave: () => void;
     roomName: string;
+    initialMicOn?: boolean;
+    initialCamOn?: boolean;
 }
 
-export default function VideoRoom({ token, userGender, isHost, onLeave, roomName }: VideoRoomProps) {
+export default function VideoRoom({ token, userGender, isHost, onLeave, roomName, initialMicOn = true, initialCamOn = true }: VideoRoomProps) {
     const [reconnectAttempts, setReconnectAttempts] = useState(0);
     const maxReconnectAttempts = 5;
     const isMobile = useIsMobile();
@@ -81,13 +83,15 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
 
     const videoQuality = getVideoQuality();
 
+    console.log('[VideoRoom] Initial Media State:', { initialMicOn, initialCamOn });
+
     return (
         <LiveKitRoom
-            video={{
+            video={initialCamOn ? {
                 resolution: `${videoQuality.width}x${videoQuality.height}` as any,
                 frameRate: videoQuality.frameRate,
-            }}
-            audio={true}
+            } : false}
+            audio={initialMicOn}
             token={token}
             serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
             data-lk-theme="default"

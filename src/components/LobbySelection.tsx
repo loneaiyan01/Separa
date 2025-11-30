@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +16,7 @@ import { User, ShieldCheck, Crown, ArrowLeft, Lock, History, Plus, Mic, MicOff, 
 import CreateRoomModal from "@/components/CreateRoomModal";
 
 interface LobbySelectionProps {
-    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string) => Promise<void>;
+    onJoin: (name: string, gender: Gender, isHost: boolean, roomPassword?: string, roomId?: string, initialMic?: boolean, initialCam?: boolean) => Promise<void>;
     roomId?: string;
     roomName?: string;
 }
@@ -48,8 +49,9 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
     const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("");
     const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>("");
-    const [isMicEnabled, setIsMicEnabled] = useState(true);
-    const [isCamEnabled, setIsCamEnabled] = useState(true);
+    const searchParams = useSearchParams();
+    const [isMicEnabled, setIsMicEnabled] = useState(searchParams.get('audio') !== 'false');
+    const [isCamEnabled, setIsCamEnabled] = useState(searchParams.get('video') !== 'false');
 
     // Audio visualization ref
     const micBarRef = useRef<HTMLDivElement>(null);
@@ -207,7 +209,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             setRoleStep('brother-joining');
             setIsLoading(true);
             try {
-                await onJoin(displayName, 'male', false, roomPassword || undefined, actualRoomId);
+                await onJoin(displayName, 'male', false, roomPassword || undefined, actualRoomId, isMicEnabled, isCamEnabled);
             } catch (err: any) {
                 setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
@@ -239,7 +241,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                await onJoin(displayName, 'host', true, roomPassword || undefined, actualRoomId);
+                await onJoin(displayName, 'host', true, roomPassword || undefined, actualRoomId, isMicEnabled, isCamEnabled);
             } catch (err: any) {
                 setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
@@ -251,7 +253,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 return;
             }
             try {
-                await onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId);
+                await onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId, isMicEnabled, isCamEnabled);
             } catch (err: any) {
                 setError(err.message || "Failed to join. Please try again.");
                 setIsLoading(false);
@@ -347,9 +349,29 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             }
 
             console.log("Camera started successfully!");
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error accessing media devices:", err);
-            setError("Could not access camera. Please allow permissions in your browser settings.");
+
+            // Provide specific error messages based on error type
+            let errorMessage = "Could not access camera/microphone.";
+
+            if (err.name === 'NotReadableError') {
+                errorMessage = "Camera/microphone is in use by another application. Please close other apps using your camera/mic and try again.";
+            } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                errorMessage = "Camera/microphone permission denied. Please allow access in your browser settings.";
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                errorMessage = "No camera/microphone found. Please connect a device and try again.";
+            } else if (err.name === 'OverconstrainedError') {
+                errorMessage = "Selected device not available. Trying with default device...";
+                // Retry with default devices
+                setTimeout(() => {
+                    setSelectedVideoDevice("");
+                    setSelectedAudioDevice("");
+                    startCameraPreview();
+                }, 1000);
+            }
+
+            setError(errorMessage);
             setIsCameraLoading(false);
         }
     };
@@ -452,11 +474,18 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
 
         if (cameraStream.getAudioTracks().length > 0) {
             try {
+                console.log('[Audio Viz] Starting audio visualization...');
+                console.log('[Audio Viz] Audio tracks:', cameraStream.getAudioTracks());
+
                 const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
                 audioContext = new AudioContextClass();
 
+                console.log('[Audio Viz] AudioContext state:', audioContext.state);
+
                 if (audioContext.state === 'suspended') {
-                    audioContext.resume();
+                    audioContext.resume().then(() => {
+                        console.log('[Audio Viz] AudioContext resumed, new state:', audioContext.state);
+                    });
                 }
 
                 analyser = audioContext.createAnalyser();
@@ -469,9 +498,11 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 const bufferLength = analyser.frequencyBinCount;
                 const dataArray = new Uint8Array(bufferLength);
 
+                console.log('[Audio Viz] Analyser configured, bufferLength:', bufferLength);
+
                 const updateAudioLevel = () => {
                     if (!micBarRef.current) {
-                        animationFrameId = requestAnimationFrame(updateAudioLevel);
+                        console.warn('[Audio Viz] micBarRef.current is null, stopping animation');
                         return;
                     }
 
@@ -485,6 +516,11 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                     // Map volume (0-100) to percentage
                     // Multiply by 2 as requested
                     const volumePercent = Math.min(100, average * 2);
+
+                    // Debug: Log every 60 frames (once per second at 60fps)
+                    if (Math.random() < 0.016) {
+                        console.log('[Audio Viz] average:', average, 'volumePercent:', volumePercent, 'sum:', sum);
+                    }
 
                     // Update the CSS Bar directly
                     micBarRef.current.style.width = volumePercent + '%';
@@ -500,9 +536,12 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 };
 
                 updateAudioLevel();
+                console.log('[Audio Viz] Animation loop started');
             } catch (e) {
                 console.error("Audio viz error:", e);
             }
+        } else {
+            console.warn('[Audio Viz] No audio tracks found in stream');
         }
 
         return () => {

@@ -2371,5 +2371,249 @@
     },
     "id": "d4312290b14fac25",
     "timestamp": 1764495838781
+  },
+  {
+    "roomId": "9ae87b807c4c6824",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 8676c5de\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "4c421fc5c113e2dd",
+    "timestamp": 1764497564575
+  },
+  {
+    "roomId": "80e0fd9f7982c4c1",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 1344a48b\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "84eb28729c6107c3",
+    "timestamp": 1764497585450
+  },
+  {
+    "roomId": "91f4ea2a22714e29",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 7124eab8\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "513202a8d7330726",
+    "timestamp": 1764497720362
+  },
+  {
+    "roomId": "45edd00338280cf0",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 68e5da57\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "6dedc422c02e7293",
+    "timestamp": 1764497932582
+  },
+  {
+    "roomId": "798a218520e66ea3",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room e874f8cd\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "d15c87e91e7869f6",
+    "timestamp": 1764497956824
+  },
+  {
+    "roomId": "798a218520e66ea3",
+    "action": "participant_joined",
+    "actorName": "PureSalafi",
+    "actorIdentity": "PureSalafi",
+    "details": "PureSalafi joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "924fa541e0132534",
+    "timestamp": 1764497988307
+  },
+  {
+    "roomId": "bc0ff93121ce7f27",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room a52235c1\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "14df416b1ce2756c",
+    "timestamp": 1764498005147
+  },
+  {
+    "roomId": "bd2e802ac377bc62",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room f303f1a5\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "4575cb70d3be8ac6",
+    "timestamp": 1764498161088
+  },
+  {
+    "roomId": "bd2e802ac377bc62",
+    "action": "participant_joined",
+    "actorName": "you aren't passing the state (On/Off) from the Lobby Page to the Room Page.  When you click \"Join,\" the browser loads a completely new page (room.html). The new page has no idea that you clicked the \"Mute\" button on the previous page, so it just starts fresh with everything ON.  The Fix: Pass the State via URL Parameters You need to send the cam=false or mic=false status in the URL when redirecting.  Step 1: Update the \"Join\" Button Logic (Lobby Page) In your script.js (Lobby side), look for where you handle the window.location.href redirect. You need to append the state of your buttons.  javascript document.getElementById('join-btn').addEventListener('click', () => {     // 1. Get current state from your toggle buttons     // (Assuming you used the boolean variables from the previous step)     const camState = isCamOn; // true or false     const micState = isMicOn; // true or false          // 2. Get other info     const roomId = \"some-room-id\";           // 3. Redirect with Query Params     // URL will look like: room.html?room=123&video=false&audio=true     window.location.href = `room.html?room=${roomId}&video=${camState}&audio=${micState}`; }); Step 2: Read the State on Load (Room Page) In your room.html script, you need to read these params before you start the call.  javascript // room.js (or script section in room.html)  // 1. Parse URL Params const urlParams = new URLSearchParams(window.location.search); const startVideo = urlParams.get('video') === 'true'; // Converts string \"true\" to boolean true const startAudio = urlParams.get('audio') === 'true';  // 2. Initialize Media with these constraints async function joinRoom() {     const stream = await navigator.mediaDevices.getUserMedia({         video: true, // We still request access...         audio: true     });      // 3. Immediately apply the mute state     stream.getVideoTracks()[0].enabled = startVideo; // If false, it starts muted     stream.getAudioTracks()[0].enabled = startAudio;      // 4. Update your Room UI buttons to match     if (!startVideo) {         document.getElementById('room-cam-btn').classList.add('off');         // Show \"Video Off\" icon     }          // ... continue joining logic ... } Why this works: The media stream technically starts \"Alive\" (so permission is granted), but you immediately disable the tracks (0ms delay) based on the URL param. The user enters the room effectively muted, honoring their choice.",
+    "actorIdentity": "you aren't passing the state (On/Off) from the Lobby Page to the Room Page.  When you click \"Join,\" the browser loads a completely new page (room.html). The new page has no idea that you clicked the \"Mute\" button on the previous page, so it just starts fresh with everything ON.  The Fix: Pass the State via URL Parameters You need to send the cam=false or mic=false status in the URL when redirecting.  Step 1: Update the \"Join\" Button Logic (Lobby Page) In your script.js (Lobby side), look for where you handle the window.location.href redirect. You need to append the state of your buttons.  javascript document.getElementById('join-btn').addEventListener('click', () => {     // 1. Get current state from your toggle buttons     // (Assuming you used the boolean variables from the previous step)     const camState = isCamOn; // true or false     const micState = isMicOn; // true or false          // 2. Get other info     const roomId = \"some-room-id\";           // 3. Redirect with Query Params     // URL will look like: room.html?room=123&video=false&audio=true     window.location.href = `room.html?room=${roomId}&video=${camState}&audio=${micState}`; }); Step 2: Read the State on Load (Room Page) In your room.html script, you need to read these params before you start the call.  javascript // room.js (or script section in room.html)  // 1. Parse URL Params const urlParams = new URLSearchParams(window.location.search); const startVideo = urlParams.get('video') === 'true'; // Converts string \"true\" to boolean true const startAudio = urlParams.get('audio') === 'true';  // 2. Initialize Media with these constraints async function joinRoom() {     const stream = await navigator.mediaDevices.getUserMedia({         video: true, // We still request access...         audio: true     });      // 3. Immediately apply the mute state     stream.getVideoTracks()[0].enabled = startVideo; // If false, it starts muted     stream.getAudioTracks()[0].enabled = startAudio;      // 4. Update your Room UI buttons to match     if (!startVideo) {         document.getElementById('room-cam-btn').classList.add('off');         // Show \"Video Off\" icon     }          // ... continue joining logic ... } Why this works: The media stream technically starts \"Alive\" (so permission is granted), but you immediately disable the tracks (0ms delay) based on the URL param. The user enters the room effectively muted, honoring their choice.",
+    "details": "you aren't passing the state (On/Off) from the Lobby Page to the Room Page.  When you click \"Join,\" the browser loads a completely new page (room.html). The new page has no idea that you clicked the \"Mute\" button on the previous page, so it just starts fresh with everything ON.  The Fix: Pass the State via URL Parameters You need to send the cam=false or mic=false status in the URL when redirecting.  Step 1: Update the \"Join\" Button Logic (Lobby Page) In your script.js (Lobby side), look for where you handle the window.location.href redirect. You need to append the state of your buttons.  javascript document.getElementById('join-btn').addEventListener('click', () => {     // 1. Get current state from your toggle buttons     // (Assuming you used the boolean variables from the previous step)     const camState = isCamOn; // true or false     const micState = isMicOn; // true or false          // 2. Get other info     const roomId = \"some-room-id\";           // 3. Redirect with Query Params     // URL will look like: room.html?room=123&video=false&audio=true     window.location.href = `room.html?room=${roomId}&video=${camState}&audio=${micState}`; }); Step 2: Read the State on Load (Room Page) In your room.html script, you need to read these params before you start the call.  javascript // room.js (or script section in room.html)  // 1. Parse URL Params const urlParams = new URLSearchParams(window.location.search); const startVideo = urlParams.get('video') === 'true'; // Converts string \"true\" to boolean true const startAudio = urlParams.get('audio') === 'true';  // 2. Initialize Media with these constraints async function joinRoom() {     const stream = await navigator.mediaDevices.getUserMedia({         video: true, // We still request access...         audio: true     });      // 3. Immediately apply the mute state     stream.getVideoTracks()[0].enabled = startVideo; // If false, it starts muted     stream.getAudioTracks()[0].enabled = startAudio;      // 4. Update your Room UI buttons to match     if (!startVideo) {         document.getElementById('room-cam-btn').classList.add('off');         // Show \"Video Off\" icon     }          // ... continue joining logic ... } Why this works: The media stream technically starts \"Alive\" (so permission is granted), but you immediately disable the tracks (0ms delay) based on the URL param. The user enters the room effectively muted, honoring their choice. joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "30c92fd0a1d0a75a",
+    "timestamp": 1764498717066
+  },
+  {
+    "roomId": "816968705b7d9d67",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 1942597f\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "8ea443618f77cd1a",
+    "timestamp": 1764498926309
+  },
+  {
+    "roomId": "816968705b7d9d67",
+    "action": "participant_joined",
+    "actorName": "kk",
+    "actorIdentity": "kk",
+    "details": "kk joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "677dfb7188c7e0b6",
+    "timestamp": 1764498937622
+  },
+  {
+    "roomId": "90eeef2a1241c573",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 1768b3cb\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "f0691bfb4fd797b7",
+    "timestamp": 1764498944957
+  },
+  {
+    "roomId": "90eeef2a1241c573",
+    "action": "participant_joined",
+    "actorName": "kk",
+    "actorIdentity": "kk",
+    "details": "kk joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "bf761661548c12e6",
+    "timestamp": 1764498954999
+  },
+  {
+    "roomId": "eed005f89d8b5511",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 6724ba52\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "050875cb43dec09b",
+    "timestamp": 1764498963110
+  },
+  {
+    "roomId": "eed005f89d8b5511",
+    "action": "participant_joined",
+    "actorName": "kk",
+    "actorIdentity": "kk",
+    "details": "kk joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "53879d88529438e5",
+    "timestamp": 1764498969458
+  },
+  {
+    "roomId": "39e4d9d981987a93",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 47e9432c\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "8ae821f77e3642dd",
+    "timestamp": 1764498976019
+  },
+  {
+    "roomId": "39e4d9d981987a93",
+    "action": "participant_joined",
+    "actorName": "kk",
+    "actorIdentity": "kk",
+    "details": "kk joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "79301f34b5d1cf05",
+    "timestamp": 1764498984698
   }
 ]

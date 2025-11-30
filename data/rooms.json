@@ -3274,5 +3274,313 @@
     },
     "blockedIps": [],
     "allowedIps": []
+  },
+  {
+    "id": "9ae87b807c4c6824",
+    "name": "Room 8676c5de",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764497564532,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "80e0fd9f7982c4c1",
+    "name": "Room 1344a48b",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764497585426,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "91f4ea2a22714e29",
+    "name": "Room 7124eab8",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764497720338,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "45edd00338280cf0",
+    "name": "Room 68e5da57",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764497932553,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "798a218520e66ea3",
+    "name": "Room e874f8cd",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764497956800,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "bc0ff93121ce7f27",
+    "name": "Room a52235c1",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498005128,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "bd2e802ac377bc62",
+    "name": "Room f303f1a5",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498161070,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "816968705b7d9d67",
+    "name": "Room 1942597f",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498926281,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "90eeef2a1241c573",
+    "name": "Room 1768b3cb",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498944932,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "eed005f89d8b5511",
+    "name": "Room 6724ba52",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498963082,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
+  },
+  {
+    "id": "39e4d9d981987a93",
+    "name": "Room 47e9432c",
+    "description": "",
+    "template": "brothers-only",
+    "locked": false,
+    "creator": "Anonymous",
+    "createdAt": 1764498975999,
+    "settings": {
+      "allowedGenders": [
+        "male",
+        "host"
+      ],
+      "requireHost": false,
+      "maxParticipants": null
+    },
+    "securityConfig": {
+      "e2eeEnabled": false,
+      "e2eeKeyRotationInterval": 60,
+      "requireVerifiedParticipants": false,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 15,
+      "geoBlockEnabled": false,
+      "blockedCountries": []
+    },
+    "blockedIps": [],
+    "allowedIps": []
   }
 ]
