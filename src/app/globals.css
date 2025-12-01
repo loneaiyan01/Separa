@@ -998,3 +998,7 @@ body {
   background: conic-gradient(from 0deg, transparent 0deg, transparent 300deg, var(--theme-color) 360deg);
   transition: background 0.5s ease;
 }
+/* Hide default LiveKit participant placeholder */
+.lk-participant-placeholder {
+  display: none !important;
+}

@@ -4,11 +4,15 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import HostConsole from "../HostConsole";
 
 export default function GlassVault() {
     const [isCreateMode, setIsCreateMode] = useState(false);
     const [roomId, setRoomId] = useState("");
     const [isCreating, setIsCreating] = useState(false);
+    const [showHostConsole, setShowHostConsole] = useState(false);
+    const [createdRoomId, setCreatedRoomId] = useState("");
+    const [createdRoomCode, setCreatedRoomCode] = useState("");
     const router = useRouter();
 
     const handleCreateRoom = async () => {
@@ -34,14 +38,17 @@ export default function GlassVault() {
                 throw new Error('Failed to create room');
             }
 
-            const { id: createdRoomId } = await response.json();
+            const { id: roomIdFromApi } = await response.json();
 
             // 3. Mark user as Host in sessionStorage
             sessionStorage.setItem('userRole', 'host');
             sessionStorage.setItem('isHost', 'true');
 
-            // 4. Instant redirect to room lobby (< 200ms)
-            router.push(`/room/${createdRoomId}`);
+            // 4. Show Host Console instead of redirecting
+            setCreatedRoomId(roomIdFromApi);
+            setCreatedRoomCode(uniqueId.toUpperCase());
+            setShowHostConsole(true);
+            setIsCreating(false);
         } catch (error) {
             console.error('Error creating room:', error);
             setIsCreating(false);
@@ -53,6 +60,11 @@ export default function GlassVault() {
             router.push(`/room/${roomId}`);
         }
     };
+
+    // If showing host console, render it instead
+    if (showHostConsole) {
+        return <HostConsole roomId={createdRoomId} roomCode={createdRoomCode} />;
+    }
 
     return (
         <motion.div

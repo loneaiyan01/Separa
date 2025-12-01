@@ -49,6 +49,23 @@ export default function RoomPage() {
         if (roomId) {
             fetchRoomData();
         }
+
+        // Check for auto-join token (from HostConsole)
+        const autoJoinToken = sessionStorage.getItem('autoJoinToken');
+        const autoJoinGender = sessionStorage.getItem('autoJoinGender') as Gender;
+        const skipLobby = sessionStorage.getItem('skipLobby');
+
+        if (autoJoinToken && skipLobby === 'true') {
+            setToken(autoJoinToken);
+            setUserGender(autoJoinGender || 'male');
+            setIsHost(true);
+            setShowLobby(false);
+
+            // Clear session storage
+            sessionStorage.removeItem('autoJoinToken');
+            sessionStorage.removeItem('autoJoinGender');
+            sessionStorage.removeItem('skipLobby');
+        }
     }, [roomId]);
 
     const handleJoin = async (participantName: string, gender: Gender, isHostRole: boolean, password?: string, providedRoomId?: string, initialMic?: boolean, initialCam?: boolean) => {
@@ -98,7 +115,7 @@ export default function RoomPage() {
     };
 
     const handleLeave = () => {
-        router.push('/rooms');
+        router.push('/');
     };
 
     // If token exists, show the video room (full screen)
@@ -196,7 +213,7 @@ export default function RoomPage() {
                                 Go to Home
                             </button>
                             <button
-                                onClick={() => router.push('/rooms')}
+                                onClick={() => router.push('/')}
                                 className="glass-subtle text-slate-300 px-6 py-3 rounded-lg font-semibold hover:bg-slate-700/50 transition-all"
                             >
                                 Browse Rooms

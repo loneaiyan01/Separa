@@ -2615,5 +2615,715 @@
     },
     "id": "79301f34b5d1cf05",
     "timestamp": 1764498984698
+  },
+  {
+    "roomId": "2ab6b675a2f30a13",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 39d77f6c\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "c9b22c08ca9bd6ad",
+    "timestamp": 1764598261215
+  },
+  {
+    "roomId": "53332f4ed4873802",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room b621144d\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "257ef414cfdab4bf",
+    "timestamp": 1764599412348
+  },
+  {
+    "roomId": "b5ce72b8798c9584",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 293d4505\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "131371a579a6c702",
+    "timestamp": 1764599964104
+  },
+  {
+    "roomId": "9db5c7ef7337dd9d",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 16149d61\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "78734f403d2a2d00",
+    "timestamp": 1764600018554
+  },
+  {
+    "roomId": "ce649f2e42322976",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 9e2c5ef5\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "d1248ff498944bb0",
+    "timestamp": 1764600080996
+  },
+  {
+    "roomId": "ce649f2e42322976",
+    "action": "participant_joined",
+    "actorName": "aa",
+    "actorIdentity": "aa",
+    "details": "aa joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "host",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "bd4c8bd9f9293334",
+    "timestamp": 1764600166982
+  },
+  {
+    "roomId": "ce649f2e42322976",
+    "action": "participant_joined",
+    "actorName": "AA",
+    "actorIdentity": "AA",
+    "details": "AA joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "6647c8da395b47de",
+    "timestamp": 1764600182850
+  },
+  {
+    "roomId": "46f7673a21e7de8b",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 8aae15b5\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "4fa05d97ffca2f7b",
+    "timestamp": 1764600353864
+  },
+  {
+    "roomId": "e45b3ce1b9d11fc7",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 35314c57\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "14bb52a6419088be",
+    "timestamp": 1764600364933
+  },
+  {
+    "roomId": "d461b7c4eb687155",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 14b4b80a\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "c0018eea33bdea67",
+    "timestamp": 1764600372610
+  },
+  {
+    "roomId": "e45b3ce1b9d11fc7",
+    "action": "room_updated",
+    "actorName": "anonymous",
+    "details": "Room updated: locked",
+    "ipAddress": "::1",
+    "metadata": {
+      "updatedFields": [
+        "locked"
+      ]
+    },
+    "id": "2ba03e4b8ca7e1de",
+    "timestamp": 1764600393651
+  },
+  {
+    "roomId": "3b98ba037ba4e6ad",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 82f2ecde\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "c35215f017390e9c",
+    "timestamp": 1764600404927
+  },
+  {
+    "roomId": "dc413375939b76c2",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 17ea3654\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "27021d7e12c63b35",
+    "timestamp": 1764600412225
+  },
+  {
+    "roomId": "bb072c3a57e89636",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room d606e2f4\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "65ca5cf02641e798",
+    "timestamp": 1764600673055
+  },
+  {
+    "roomId": "55e9d20e4bd30516",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 8812c7e6\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "dcbd2bf4a863aab6",
+    "timestamp": 1764600696955
+  },
+  {
+    "roomId": "3b98ba037ba4e6ad",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "11c2944928cecc4b",
+    "timestamp": 1764601037062
+  },
+  {
+    "roomId": "ee443a7e64ede782",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 69bee91b\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "7d1530fdfde027ac",
+    "timestamp": 1764601054953
+  },
+  {
+    "roomId": "ee443a7e64ede782",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "6964ac0b5569419a",
+    "timestamp": 1764601063920
+  },
+  {
+    "roomId": "2ecb7a1dda55936c",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 6ac09085\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "e7642e9acf9a047d",
+    "timestamp": 1764601203322
+  },
+  {
+    "roomId": "9ada46d270b752c0",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room edeec65a\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "2e1120f56fd47405",
+    "timestamp": 1764601231871
+  },
+  {
+    "roomId": "2ecb7a1dda55936c",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "986b6035097f0319",
+    "timestamp": 1764601239583
+  },
+  {
+    "roomId": "2ecb7a1dda55936c",
+    "action": "participant_joined",
+    "actorName": "ss",
+    "actorIdentity": "ss",
+    "details": "ss joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "db3db4ccbae2df2c",
+    "timestamp": 1764601271617
+  },
+  {
+    "roomId": "7a0fea99129da856",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room d9f9adb5\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "6ef2d6581536fa60",
+    "timestamp": 1764601297648
+  },
+  {
+    "roomId": "7a0fea99129da856",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "bcac329d3aa3ecfa",
+    "timestamp": 1764601417010
+  },
+  {
+    "roomId": "9ada46d270b752c0",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "e0a1023d9ace7f0f",
+    "timestamp": 1764601438388
+  },
+  {
+    "roomId": "9ada46d270b752c0",
+    "action": "participant_joined",
+    "actorName": "a",
+    "actorIdentity": "a",
+    "details": "a joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "9c51fb4c503895f8",
+    "timestamp": 1764601446974
+  },
+  {
+    "roomId": "9ada46d270b752c0",
+    "action": "participant_joined",
+    "actorName": "a",
+    "actorIdentity": "a",
+    "details": "a joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "d107cbe6a00be2bd",
+    "timestamp": 1764601792220
+  },
+  {
+    "roomId": "04ec61fda1daea60",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 24473c1b\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "2c7fa3182f42a6ee",
+    "timestamp": 1764601897650
+  },
+  {
+    "roomId": "04ec61fda1daea60",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "840a141ce5294fa0",
+    "timestamp": 1764601898925
+  },
+  {
+    "roomId": "9ada46d270b752c0",
+    "action": "participant_joined",
+    "actorName": "a",
+    "actorIdentity": "a",
+    "details": "a joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "51a5838d872445d6",
+    "timestamp": 1764601910151
+  },
+  {
+    "roomId": "8f979d27c8f9fccb",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 1f4e919a\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "ac4e97a1b754d9c7",
+    "timestamp": 1764601919731
+  },
+  {
+    "roomId": "8f979d27c8f9fccb",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "b9b54e4799099533",
+    "timestamp": 1764601923280
+  },
+  {
+    "roomId": "efa1870cd781b265",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 87befe8b\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "6faf018ba59d6bbf",
+    "timestamp": 1764601928526
+  },
+  {
+    "roomId": "d33651d15b6d2ece",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 5601ca9a\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "a374588a9d58be3f",
+    "timestamp": 1764602749619
+  },
+  {
+    "roomId": "d33651d15b6d2ece",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "98440de39f651cf2",
+    "timestamp": 1764602751084
+  },
+  {
+    "roomId": "9d565b2651ea87b6",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room d5433893\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "3694af3fd99f54d0",
+    "timestamp": 1764602757166
+  },
+  {
+    "roomId": "9d565b2651ea87b6",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "485b54f57d217e13",
+    "timestamp": 1764602763574
+  },
+  {
+    "roomId": "9d565b2651ea87b6",
+    "action": "participant_joined",
+    "actorName": "z",
+    "actorIdentity": "z",
+    "details": "z joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "fd754487c194c5ab",
+    "timestamp": 1764602765638
+  },
+  {
+    "roomId": "9d565b2651ea87b6",
+    "action": "participant_joined",
+    "actorName": "a",
+    "actorIdentity": "a",
+    "details": "a joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "83e365798d23b7d8",
+    "timestamp": 1764603227286
+  },
+  {
+    "roomId": "9d565b2651ea87b6",
+    "action": "participant_joined",
+    "actorName": "ll",
+    "actorIdentity": "ll",
+    "details": "ll joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "4e63899db25cb09d",
+    "timestamp": 1764603841402
+  },
+  {
+    "roomId": "8036c0def2ce63d6",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 6c09fac8\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "9eb926f50eb7f3f5",
+    "timestamp": 1764603849593
+  },
+  {
+    "roomId": "8036c0def2ce63d6",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "5f000119a2d0c3d9",
+    "timestamp": 1764603851634
+  },
+  {
+    "roomId": "8036c0def2ce63d6",
+    "action": "participant_joined",
+    "actorName": "Aiyan",
+    "actorIdentity": "Aiyan",
+    "details": "Aiyan joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "666e51dbad5c501d",
+    "timestamp": 1764603856997
+  },
+  {
+    "roomId": "8036c0def2ce63d6",
+    "action": "participant_joined",
+    "actorName": "labeeb",
+    "actorIdentity": "labeeb",
+    "details": "labeeb joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "4741b8e8df56e4fa",
+    "timestamp": 1764603881105
+  },
+  {
+    "roomId": "04ec61fda1daea60",
+    "action": "participant_joined",
+    "actorName": "a",
+    "actorIdentity": "a",
+    "details": "a joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "host",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "7fcd31c711f26e9f",
+    "timestamp": 1764603904826
+  },
+  {
+    "roomId": "d7f050147b495e0a",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 25805912\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "93a400bcd2fd23c1",
+    "timestamp": 1764604032694
+  },
+  {
+    "roomId": "d7f050147b495e0a",
+    "action": "participant_joined",
+    "actorName": "Host",
+    "actorIdentity": "Host",
+    "details": "Host joined as host",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": true,
+      "e2eeEnabled": false
+    },
+    "id": "8a9c1899705d5504",
+    "timestamp": 1764604045509
+  },
+  {
+    "roomId": "d7f050147b495e0a",
+    "action": "participant_joined",
+    "actorName": "h",
+    "actorIdentity": "h",
+    "details": "h joined as male",
+    "ipAddress": "::1",
+    "metadata": {
+      "gender": "male",
+      "isHost": false,
+      "e2eeEnabled": false
+    },
+    "id": "92ab98b33102bc73",
+    "timestamp": 1764604049005
+  },
+  {
+    "roomId": "54a36befbb530379",
+    "action": "room_created",
+    "actorName": "Anonymous",
+    "details": "Room \"Room 59c56ba9\" created with template: brothers-only",
+    "ipAddress": "::1",
+    "metadata": {
+      "template": "brothers-only",
+      "locked": false,
+      "hasSessionPassword": false
+    },
+    "id": "a95a05e61309f06d",
+    "timestamp": 1764604075990
   }
 ]

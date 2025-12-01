@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TrackReferenceOrPlaceholder, ParticipantTile } from '@livekit/components-react';
 import { Track } from 'livekit-client';
 import { Maximize2, Minimize2 } from 'lucide-react';
+import MonogramPlaceholder from '../MonogramPlaceholder';
 
 interface PiPLayoutProps {
   tracks: TrackReferenceOrPlaceholder[];
@@ -20,7 +21,7 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
   const screenShare = tracks.find(
     (track) => track.publication?.source === Track.Source.ScreenShare
   );
-  
+
   const primaryTrack = screenShare || tracks.find((track) => {
     const participant = track.participant;
     return participant?.isSpeaking || !participant?.isLocal;
@@ -43,7 +44,7 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
     setPipPosition(positions[nextIndex]);
   };
 
-  const pipSize = pipExpanded 
+  const pipSize = pipExpanded
     ? (isMobile ? 'w-48 h-36' : 'w-80 h-60')
     : (isMobile ? 'w-32 h-24' : 'w-64 h-48');
 
@@ -52,10 +53,13 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
       {/* Main View */}
       <div className="absolute inset-0 w-full h-full bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-800/50 shadow-xl">
         {primaryTrack && (
-          <ParticipantTile 
+          <ParticipantTile
             trackRef={primaryTrack}
             {...primaryTrack}
-          />
+            className="relative"
+          >
+            <MonogramPlaceholder />
+          </ParticipantTile>
         )}
         {screenShare && (
           <div className="absolute top-4 left-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full backdrop-blur-sm z-10 shadow-lg animate-scale-in">
@@ -81,13 +85,16 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
         >
           {/* PiP Content */}
           <div className="w-full h-full relative">
-            <ParticipantTile 
+            <ParticipantTile
               trackRef={pipTrack}
               {...pipTrack}
-            />
-            
+              className="relative"
+            >
+              <MonogramPlaceholder />
+            </ParticipantTile>
+
             {/* Controls Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20">
               <div className="absolute bottom-2 right-2 flex gap-2">
                 {/* Expand/Collapse Button */}
                 <button
@@ -101,7 +108,7 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
                     <Maximize2 className="w-4 h-4" />
                   )}
                 </button>
-                
+
                 {/* Move Button */}
                 <button
                   onClick={cyclePiPPosition}
@@ -116,7 +123,7 @@ export default function PiPLayout({ tracks, isMobile = false }: PiPLayoutProps) 
             </div>
 
             {/* Participant Name Label */}
-            <div className="absolute top-2 left-2 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
+            <div className="absolute top-2 left-2 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm z-20">
               {pipTrack.participant.identity}
               {pipTrack.participant.isLocal && ' (You)'}
             </div>

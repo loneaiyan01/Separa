@@ -2,6 +2,7 @@
 
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ParticipantTile, GridLayout } from '@livekit/components-react';
+import MonogramPlaceholder from '../MonogramPlaceholder';
 
 interface GalleryLayoutProps {
   tracks: TrackReferenceOrPlaceholder[];
@@ -24,8 +25,10 @@ export default function GalleryLayout({ tracks, isMobile = false }: GalleryLayou
         <ParticipantTile
           key={track.participant.identity}
           trackRef={track}
-          className="w-full h-full rounded-xl overflow-hidden border border-slate-700/50 shadow-lg bg-slate-900/50"
-        />
+          className="w-full h-full rounded-xl overflow-hidden border border-slate-700/50 shadow-lg bg-slate-900/50 relative"
+        >
+          <MonogramPlaceholder />
+        </ParticipantTile>
       ))}
     </div>
   );

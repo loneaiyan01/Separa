@@ -115,9 +115,25 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
             />
             <RoomAudioRenderer />
 
-            {/* Mobile-optimized control bar */}
-            <div className={`fixed ${isMobile ? 'bottom-4' : 'bottom-6'} left-1/2 -translate-x-1/2 z-50 glass-strong rounded-full ${isMobile ? 'px-2 py-1.5' : 'px-4 py-2'} shadow-2xl border border-slate-700/50 animate-slide-up`}>
-                <ControlBar variation="minimal" controls={{ chat: false, screenShare: !isMobile }} />
+            {/* Floating Island Control Bar */}
+            <div
+                className={`fixed bottom-6 left-1/2 z-50 transition-all duration-300 ease-out`}
+                style={{
+                    transform: 'translateX(-50%)',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-50%) translateY(-4px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(-50%)'}
+            >
+                <div
+                    className={`flex items-center gap-2 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} rounded-full border border-white/10`}
+                    style={{
+                        background: 'rgba(30, 41, 59, 0.6)',
+                        backdropFilter: 'blur(16px)',
+                        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+                    }}
+                >
+                    <ControlBar variation="minimal" controls={{ chat: false, screenShare: !isMobile }} />
+                </div>
             </div>
         </LiveKitRoom>
     );
