@@ -24,7 +24,7 @@ interface CreateRoomModalProps {
 export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: CreateRoomModalProps) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [template, setTemplate] = useState<RoomTemplate>('brothers-only');
+    const [template, setTemplate] = useState<RoomTemplate>('open');
     const [locked, setLocked] = useState(false);
     const [password, setPassword] = useState('');
     const [sessionPassword, setSessionPassword] = useState('');
@@ -76,7 +76,7 @@ export default function CreateRoomModal({ isOpen, onClose, onCreateRoom }: Creat
             // Reset form
             setName('');
             setDescription('');
-            setTemplate('brothers-only');
+            setTemplate('open');
             setLocked(false);
             setPassword('');
             setSessionPassword('');

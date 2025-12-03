@@ -3,6 +3,7 @@ import { getRoomById, updateRoom, deleteRoom, addAuditLog } from '@/lib/storage'
 import { UpdateRoomRequest } from '@/types';
 import { hashPassword, extractClientIp } from '@/lib/security';
 import crypto from 'crypto';
+import { getTemplateSettings } from '@/lib/room-templates';
 
 // GET - Get room by ID
 export async function GET(
@@ -41,7 +42,7 @@ export async function PATCH(
 ) {
     try {
         const { roomId } = await params;
-        const body: UpdateRoomRequest & { actorName?: string } = await req.json();
+        const body: UpdateRoomRequest & { actorName?: string; template?: string } = await req.json();
 
         const actorName = body.actorName || 'anonymous';
         const clientIp = extractClientIp(req.headers);
@@ -60,35 +61,51 @@ export async function PATCH(
             updates.name = body.name;
             changedFields.push('name');
         }
-        
+
         if (body.description !== undefined && body.description !== existingRoom.description) {
             updates.description = body.description;
             changedFields.push('description');
         }
-        
+
+        // Handle Template Change
+        if (body.template !== undefined && body.template !== existingRoom.template) {
+            updates.template = body.template as any;
+            changedFields.push('template');
+
+            // Automatically update settings based on new template
+            const newSettings = getTemplateSettings(body.template as any);
+            updates.settings = newSettings;
+            changedFields.push('settings (auto-updated from template)');
+        }
+
         if (body.locked !== undefined && body.locked !== existingRoom.locked) {
             updates.locked = body.locked;
             changedFields.push('locked');
         }
-        
+
         if (body.sessionPasswordExpiry !== undefined) {
             updates.sessionPasswordExpiry = body.sessionPasswordExpiry;
             changedFields.push('sessionPasswordExpiry');
         }
-        
+
         if (body.blockedIps !== undefined) {
             updates.blockedIps = body.blockedIps;
             changedFields.push('blockedIps');
         }
-        
+
         if (body.allowedIps !== undefined) {
             updates.allowedIps = body.allowedIps;
             changedFields.push('allowedIps');
         }
-        
+
+        // Only update settings manually if template wasn't changed (or if explicitly overriding)
+        // If template changed, we already set updates.settings above. 
+        // If body.settings is ALSO provided, it will override the template defaults.
         if (body.settings !== undefined) {
-            updates.settings = { ...existingRoom.settings, ...body.settings };
-            changedFields.push('settings');
+            updates.settings = { ...(updates.settings || existingRoom.settings), ...body.settings };
+            if (!changedFields.includes('settings (auto-updated from template)')) {
+                changedFields.push('settings');
+            }
         }
 
         if (body.securityConfig !== undefined) {
@@ -186,7 +203,7 @@ export async function DELETE(
 
         // Get room details before deleting
         const room = await getRoomById(roomId);
-        
+
         if (!room) {
             return NextResponse.json({ error: 'Room not found' }, { status: 404 });
         }

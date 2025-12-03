@@ -13,11 +13,12 @@ import {
 } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { Track, RemoteTrackPublication, ConnectionState } from 'livekit-client';
-import { Gender, ParticipantMetadata, AuditLog } from '@/types';
-import { Users, Star, X, Shield, Activity, Ban, Loader2, Home, WifiOff, MessageSquare } from 'lucide-react';
+import { Gender, ParticipantMetadata, AuditLog, RoomTemplate } from '@/types';
+import { Users, Star, X, Shield, Activity, Ban, Loader2, Home, WifiOff, MessageSquare, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import ChatPanel from '@/components/ChatPanel';
+import RoomSettingsModal from '@/components/RoomSettingsModal';
 import {
     logConnectionEvent,
     saveSessionState,
@@ -38,15 +39,25 @@ interface VideoRoomProps {
     isHost: boolean;
     onLeave: () => void;
     roomName: string;
+    roomId: string;
+    initialTemplate: RoomTemplate;
     initialMicOn?: boolean;
     initialCamOn?: boolean;
 }
 
-export default function VideoRoom({ token, userGender, isHost, onLeave, roomName, initialMicOn = true, initialCamOn = true }: VideoRoomProps) {
+export default function VideoRoom({ token, userGender, isHost, onLeave, roomName, roomId, initialTemplate, initialMicOn = false, initialCamOn = false }: VideoRoomProps) {
     const [reconnectAttempts, setReconnectAttempts] = useState(0);
     const maxReconnectAttempts = 5;
     const isMobile = useIsMobile();
     const networkStatus = useNetworkStatus();
+
+    // Room Settings State
+    const [showSettings, setShowSettings] = useState(false);
+    const [template, setTemplate] = useState<RoomTemplate>(initialTemplate);
+
+    // Local state for media controls to allow overrides
+    const [micOn, setMicOn] = useState(initialMicOn);
+    const [camOn, setCamOn] = useState(initialCamOn);
 
     const handleDisconnected = useCallback(() => {
         logConnectionEvent('Disconnected from room', { roomName });
@@ -83,15 +94,37 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
 
     const videoQuality = getVideoQuality();
 
-    console.log('[VideoRoom] Initial Media State:', { initialMicOn, initialCamOn });
+    // Check for room settings overrides (from HostConsole)
+    useEffect(() => {
+        try {
+            const settingsStr = sessionStorage.getItem('roomSettings');
+            if (settingsStr) {
+                const settings = JSON.parse(settingsStr);
+                // If autoMute is enabled, force mic off
+                if (settings.autoMute) {
+                    setMicOn(false);
+                }
+                // If autoCameraOff is enabled, force cam off
+                if (settings.autoCameraOff) {
+                    setCamOn(false);
+                }
+            }
+        } catch (e) {
+            console.error('Error reading room settings:', e);
+        }
+    }, []);
+
+
+
+    console.log('[VideoRoom] Initial Media State:', { initialMicOn, initialCamOn, micOn, camOn });
 
     return (
         <LiveKitRoom
-            video={initialCamOn ? {
+            video={camOn ? {
                 resolution: `${videoQuality.width}x${videoQuality.height}` as any,
                 frameRate: videoQuality.frameRate,
             } : false}
-            audio={initialMicOn}
+            audio={micOn}
             token={token}
             serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
             data-lk-theme="default"
@@ -112,8 +145,36 @@ export default function VideoRoom({ token, userGender, isHost, onLeave, roomName
                 onLeave={onLeave}
                 isMobile={isMobile}
                 networkStatus={networkStatus}
+                micOn={micOn}
+                camOn={camOn}
             />
             <RoomAudioRenderer />
+
+            {/* Host Settings Button */}
+            {isHost && (
+                <div className="absolute top-4 right-4 z-50">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowSettings(true)}
+                        className="bg-slate-900/50 hover:bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/50 backdrop-blur-sm rounded-full"
+                        title="Room Settings"
+                    >
+                        <Settings className="w-5 h-5" />
+                    </Button>
+                </div>
+            )}
+
+            {/* Room Settings Modal */}
+            {isHost && (
+                <RoomSettingsModal
+                    isOpen={showSettings}
+                    onClose={() => setShowSettings(false)}
+                    roomId={roomId}
+                    currentTemplate={template}
+                    onUpdate={(newTemplate) => setTemplate(newTemplate)}
+                />
+            )}
 
             {/* Floating Island Control Bar */}
             <div
@@ -149,6 +210,8 @@ function RoomContent({
     onLeave,
     isMobile,
     networkStatus,
+    micOn,
+    camOn,
 }: {
     userGender: Gender;
     isHost: boolean;
@@ -159,6 +222,8 @@ function RoomContent({
     onLeave: () => void;
     isMobile: boolean;
     networkStatus: any;
+    micOn: boolean;
+    camOn: boolean;
 }) {
     const [showParticipants, setShowParticipants] = useState(false);
     const [showAuditLogs, setShowAuditLogs] = useState(false);
@@ -337,13 +402,23 @@ function RoomContent({
         if (connectionState === ConnectionState.Connected) {
             logConnectionEvent('Connection state: Connected');
             setReconnectAttempts(0); // Reset on successful connection
+
+            // Enforce media state
+            if (room?.localParticipant) {
+                if (!micOn) {
+                    room.localParticipant.setMicrophoneEnabled(false);
+                }
+                if (!camOn) {
+                    room.localParticipant.setCameraEnabled(false);
+                }
+            }
         } else if (connectionState === ConnectionState.Reconnecting) {
             logConnectionEvent('Connection state: Reconnecting');
             setReconnectAttempts(prev => prev + 1);
         } else if (connectionState === ConnectionState.Disconnected) {
             logConnectionEvent('Connection state: Disconnected');
         }
-    }, [connectionState, setReconnectAttempts]);
+    }, [connectionState, setReconnectAttempts, room, micOn, camOn]);
 
     // Save session state periodically
     useEffect(() => {

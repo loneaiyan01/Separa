@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, Copy, Check, Settings, Lock, Unlock, Users, MoreVertical, UserCheck, Mic, MicOff, UserPlus } from "lucide-react";
+import { Shield, Copy, Check, Settings, Lock, Unlock, Users, MoreVertical, UserCheck, Mic, MicOff, UserPlus, Video, VideoOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface HostConsoleProps {
@@ -26,8 +26,9 @@ export default function HostConsole({ roomId, roomCode }: HostConsoleProps) {
     const [allowBrothers, setAllowBrothers] = useState(true);
     const [allowSisters, setAllowSisters] = useState(true);
     const [requireName, setRequireName] = useState(true);
-    const [autoMute, setAutoMute] = useState(false);
-    const [hostApproval, setHostApproval] = useState(false);
+    const [autoMediaOff, setAutoMediaOff] = useState(true);
+    const [requirePassword, setRequirePassword] = useState(false);
+    const [sisterPasswordInput, setSisterPasswordInput] = useState('');
 
     const inviteLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/room/${roomId}`;
 
@@ -61,8 +62,8 @@ export default function HostConsole({ roomId, roomCode }: HostConsoleProps) {
                 allowBrothers,
                 allowSisters,
                 requireName,
-                autoMute,
-                hostApproval
+                autoMediaOff,
+                requirePassword
             }));
 
             const tokenRes = await fetch('/api/token', {
@@ -73,6 +74,13 @@ export default function HostConsole({ roomId, roomCode }: HostConsoleProps) {
                     participantName: hostName,
                     gender: 'male',
                     isHost: true,
+                    hostConsoleSettings: {
+                        allowBrothers,
+                        allowSisters,
+                        autoMediaOff,
+                        requirePassword,
+                        sisterPassword: sisterPasswordInput || undefined
+                    }
                 }),
             });
 
@@ -330,59 +338,87 @@ export default function HostConsole({ roomId, roomCode }: HostConsoleProps) {
                             </div>
                         </motion.button>
 
-                        {/* Auto-mute Card */}
+                        {/* Auto-Media Off Card (Combined Mic + Camera) */}
                         <motion.button
-                            onClick={() => setAutoMute(!autoMute)}
+                            onClick={() => setAutoMediaOff(!autoMediaOff)}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className={`relative p-4 rounded-xl border-2 transition-all ${autoMute
+                            className={`relative p-4 rounded-xl border-2 transition-all ${autoMediaOff
                                 ? 'bg-cyan-500/10 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
                                 : 'bg-slate-900/30 border-slate-700/50'
                                 }`}
                         >
                             <div className="flex items-start justify-between mb-2">
-                                {autoMute ? (
-                                    <MicOff className="w-5 h-5 text-cyan-400" />
-                                ) : (
-                                    <Mic className="w-5 h-5 text-slate-500" />
-                                )}
-                                <div className={`w-2 h-2 rounded-full ${autoMute ? 'bg-cyan-400 shadow-lg shadow-cyan-400/50' : 'bg-slate-600'}`} />
+                                <div className="flex gap-1">
+                                    {autoMediaOff ? (
+                                        <>
+                                            <MicOff className="w-4 h-4 text-cyan-400" />
+                                            <VideoOff className="w-4 h-4 text-cyan-400" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mic className="w-4 h-4 text-slate-500" />
+                                            <Video className="w-4 h-4 text-slate-500" />
+                                        </>
+                                    )}
+                                </div>
+                                <div className={`w-2 h-2 rounded-full ${autoMediaOff ? 'bg-cyan-400 shadow-lg shadow-cyan-400/50' : 'bg-slate-600'}`} />
                             </div>
                             <div className="text-left">
-                                <div className={`text-sm font-medium ${autoMute ? 'text-white' : 'text-slate-400'}`}>
-                                    Auto-mute
+                                <div className={`text-sm font-medium ${autoMediaOff ? 'text-white' : 'text-slate-400'}`}>
+                                    Auto-Media Off
                                 </div>
                                 <div className="text-xs text-slate-500 mt-0.5">
-                                    {autoMute ? 'Enabled' : 'Disabled'}
+                                    {autoMediaOff ? 'Enabled' : 'Disabled'}
                                 </div>
                             </div>
                         </motion.button>
 
-                        {/* Host Approval Card */}
+                        {/* Password Protection Card */}
                         <motion.button
-                            onClick={() => setHostApproval(!hostApproval)}
+                            onClick={() => setRequirePassword(!requirePassword)}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className={`relative p-4 rounded-xl border-2 transition-all ${hostApproval
+                            className={`relative p-4 rounded-xl border-2 transition-all ${requirePassword
                                 ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/20'
                                 : 'bg-slate-900/30 border-slate-700/50'
                                 }`}
                         >
                             <div className="flex items-start justify-between mb-2">
-                                <UserCheck className={`w-5 h-5 ${hostApproval ? 'text-amber-400' : 'text-slate-500'}`} />
-                                <div className={`w-2 h-2 rounded-full ${hostApproval ? 'bg-amber-400 shadow-lg shadow-amber-400/50' : 'bg-slate-600'}`} />
+                                <Lock className={`w-5 h-5 ${requirePassword ? 'text-amber-400' : 'text-slate-500'}`} />
+                                <div className={`w-2 h-2 rounded-full ${requirePassword ? 'bg-amber-400 shadow-lg shadow-amber-400/50' : 'bg-slate-600'}`} />
                             </div>
                             <div className="text-left">
-                                <div className={`text-sm font-medium ${hostApproval ? 'text-white' : 'text-slate-400'}`}>
-                                    Approval
+                                <div className={`text-sm font-medium ${requirePassword ? 'text-white' : 'text-slate-400'}`}>
+                                    Password
                                 </div>
                                 <div className="text-xs text-slate-500 mt-0.5">
-                                    {hostApproval ? 'Required' : 'Auto-join'}
+                                    {requirePassword ? 'Required' : 'Optional'}
                                 </div>
                             </div>
                         </motion.button>
                     </div>
                 </div>
+
+                {/* Sister Password Input (appears when requirePassword is enabled) */}
+                {requirePassword && (
+                    <div className="mb-6 animate-in slide-in-from-top-2 duration-200">
+                        <label className="block text-xs font-medium text-rose-400 uppercase tracking-wider mb-2">
+                            Sister Password
+                        </label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-rose-400 z-10" />
+                            <input
+                                type="password"
+                                value={sisterPasswordInput}
+                                onChange={(e) => setSisterPasswordInput(e.target.value)}
+                                placeholder="Enter password for sisters"
+                                className="w-full px-4 pl-10 py-3 bg-slate-900/50 border-2 border-rose-500/50 rounded-xl text-white placeholder-rose-300/30 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                            />
+                        </div>
+                        <p className="text-xs text-rose-300/60 mt-2">This password will be required for sisters to join</p>
+                    </div>
+                )}
 
                 {/* Host Name Input */}
                 <div className="mb-6">
@@ -412,6 +448,6 @@ export default function HostConsole({ roomId, roomCode }: HostConsoleProps) {
                     {isEntering ? 'Joining...' : 'Enter Room as Host'}
                 </motion.button>
             </div>
-        </motion.div>
+        </motion.div >
     );
 }

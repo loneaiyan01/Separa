@@ -17,7 +17,7 @@ export interface RoomSettings {
     e2ee?: boolean; // New security setting
 }
 
-export type AuditAction = 
+export type AuditAction =
     | 'room_created'
     | 'room_updated'
     | 'room_deleted'
@@ -67,6 +67,14 @@ export interface SecurityConfig {
     blockedCountries?: string[];
 }
 
+export interface HostConsoleSettings {
+    allowBrothers: boolean;
+    allowSisters: boolean;
+    autoMediaOff: boolean;
+    requirePassword: boolean;
+    sisterPassword?: string; // Hashed
+}
+
 export interface Room {
     id: string;
     name: string;
@@ -82,6 +90,7 @@ export interface Room {
     createdAt: number;
     settings: RoomSettings;
     securityConfig?: SecurityConfig;
+    hostConsoleSettings?: HostConsoleSettings;
     failedLoginAttempts?: Map<string, { count: number; lastAttempt: number }>; // IP -> attempts
 }
 

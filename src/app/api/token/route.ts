@@ -1,10 +1,10 @@
 import { AccessToken } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { getRoomById, addAuditLog } from '@/lib/storage';
-import { 
-  extractClientIp, 
-  isIpBlocked, 
-  verifyPassword, 
+import {
+  extractClientIp,
+  isIpBlocked,
+  verifyPassword,
   isSessionPasswordExpired,
   checkRateLimiting,
   recordFailedAttempt,
@@ -16,7 +16,7 @@ import crypto from 'crypto';
 const failedLoginAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
 export async function POST(req: NextRequest) {
-  const { roomId, participantName, gender, isHost, roomPassword } = await req.json();
+  const { roomId, participantName, gender, isHost, roomPassword, hostConsoleSettings } = await req.json();
 
   if (!participantName) {
     return NextResponse.json({ error: 'Missing participant name' }, { status: 400 });
@@ -58,13 +58,13 @@ export async function POST(req: NextRequest) {
     );
 
     if (!rateLimitCheck.allowed) {
-      const lockedUntil = rateLimitCheck.lockedUntil 
+      const lockedUntil = rateLimitCheck.lockedUntil
         ? new Date(rateLimitCheck.lockedUntil).toISOString()
         : 'unknown';
-      
-      return NextResponse.json({ 
+
+      return NextResponse.json({
         error: `Too many failed attempts. Try again later.`,
-        lockedUntil: rateLimitCheck.lockedUntil 
+        lockedUntil: rateLimitCheck.lockedUntil
       }, { status: 429 });
     }
 
@@ -80,8 +80,8 @@ export async function POST(req: NextRequest) {
         metadata: { blocked: true, reason: ipBlockCheck.reason }
       });
 
-      return NextResponse.json({ 
-        error: `Access denied: ${ipBlockCheck.reason || 'You have been blocked from this room.'}` 
+      return NextResponse.json({
+        error: `Access denied: ${ipBlockCheck.reason || 'You have been blocked from this room.'}`
       }, { status: 403 });
     }
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       // Verify password
       if (!verifyPassword(roomPassword, roomData.password!)) {
         recordFailedAttempt(clientIp, failedLoginAttempts);
-        
+
         await addAuditLog({
           roomId,
           action: 'participant_joined',
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
           // If room is not locked, session password is required
           if (!roomPassword || !verifyPassword(roomPassword, roomData.sessionPassword)) {
             recordFailedAttempt(clientIp, failedLoginAttempts);
-            
+
             await addAuditLog({
               roomId,
               action: 'participant_joined',
@@ -141,9 +141,33 @@ export async function POST(req: NextRequest) {
     const allowedGenders = roomData.settings.allowedGenders;
     const userGender = isHost ? 'host' : gender;
 
+    console.log('[Token API] Gender Check:', {
+      gender,
+      isHost,
+      userGender,
+      allowedGenders,
+      template: roomData.template,
+      hostConsoleSettings: roomData.hostConsoleSettings
+    });
+
+    // If host is joining with console settings, store them (for auto-media-off feature)
+    if (isHost && hostConsoleSettings) {
+      roomData.hostConsoleSettings = hostConsoleSettings;
+    }
+
+    // Check template-based gender restrictions
     if (!allowedGenders.includes(userGender)) {
       const templateName = roomData.template.replace(/-/g, ' ');
-      
+
+      // Generate appropriate error message based on gender and template
+      let errorMessage = `This room is ${templateName}. You cannot join.`;
+
+      if (roomData.template === 'brothers-only' && gender === 'female') {
+        errorMessage = 'This room is brothers only. Sisters cannot join.';
+      } else if (roomData.template === 'sisters-only' && gender === 'male') {
+        errorMessage = 'This room is sisters only. Brothers cannot join.';
+      }
+
       await addAuditLog({
         roomId,
         action: 'participant_joined',
@@ -154,7 +178,7 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json(
-        { error: `This room is ${templateName}. You cannot join.` },
+        { error: errorMessage },
         { status: 403 }
       );
     }
@@ -182,8 +206,8 @@ export async function POST(req: NextRequest) {
       actorIdentity: participantName,
       details: `${participantName} joined as ${isHost ? 'host' : gender}`,
       ipAddress: clientIp,
-      metadata: { 
-        gender, 
+      metadata: {
+        gender,
         isHost,
         e2eeEnabled: roomData.securityConfig?.e2eeEnabled || false
       }

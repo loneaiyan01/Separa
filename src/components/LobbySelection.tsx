@@ -22,7 +22,7 @@ interface LobbySelectionProps {
 }
 
 type WorkflowStep = 1 | 2;
-type RoleStep = 'brother-joining' | 'sister-password' | 'host-password';
+type RoleStep = 'brother-joining' | 'sister-password' | 'sister-joining' | 'host-password';
 
 export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelectionProps) {
     // 2-step workflow state
@@ -50,8 +50,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
     const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("");
     const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>("");
     const searchParams = useSearchParams();
-    const [isMicEnabled, setIsMicEnabled] = useState(searchParams.get('audio') !== 'false');
-    const [isCamEnabled, setIsCamEnabled] = useState(searchParams.get('video') !== 'false');
+    const [isMicEnabled, setIsMicEnabled] = useState(searchParams.get('audio') === 'true');
+    const [isCamEnabled, setIsCamEnabled] = useState(searchParams.get('video') === 'true');
 
     // Audio visualization ref
     const micBarRef = useRef<HTMLDivElement>(null);
@@ -216,7 +216,24 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 setRoleStep(null);
             }
         } else if (selectedRole === 'sister') {
-            setRoleStep('sister-password');
+            // Check if sister password is configured
+            const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD;
+
+            if (sisterPwd) {
+                // If password configured, show password screen
+                setRoleStep('sister-password');
+            } else {
+                // If no password, join immediately
+                setRoleStep('sister-joining'); // Optional: add a loading state for sister joining
+                setIsLoading(true);
+                try {
+                    await onJoin(displayName, 'female', false, roomPassword || undefined, actualRoomId, isMicEnabled, isCamEnabled);
+                } catch (err: any) {
+                    setError(err.message || "Failed to join. Please try again.");
+                    setIsLoading(false);
+                    setRoleStep(null);
+                }
+            }
         } else if (selectedRole === 'host') {
             setRoleStep('host-password');
         }
@@ -230,8 +247,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         setIsLoading(true);
 
         const hostPwd = process.env.NEXT_PUBLIC_HOST_PASSWORD;
-        // Fallback to 'sister' if env var is missing, for smoother dev experience
-        const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD || 'sister';
+        const sisterPwd = process.env.NEXT_PUBLIC_SISTER_PASSWORD;
         const actualRoomId = roomId || enteredRoomID;
 
         if (roleStep === 'host-password') {
@@ -247,7 +263,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 setIsLoading(false);
             }
         } else if (roleStep === 'sister-password') {
-            if (sisterPassword !== sisterPwd) {
+            // Only check password if one is configured
+            if (sisterPwd && sisterPassword !== sisterPwd) {
                 setError("Incorrect sister password. Please try again.");
                 setIsLoading(false);
                 return;
@@ -314,13 +331,19 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
         try {
             setIsCameraLoading(true);
 
-            // Request access to video and audio
+            // IMPORTANT: Request access with TRUE first (browser requirement)
+            // We MUST request with true to get the capability/permission
             const constraints: MediaStreamConstraints = {
                 video: selectedVideoDevice ? { deviceId: { exact: selectedVideoDevice } } : true,
                 audio: selectedAudioDevice ? { deviceId: { exact: selectedAudioDevice } } : true
             };
 
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+            // IMMEDIATELY disable tracks based on current state
+            // This happens BEFORE the stream is attached to any element
+            stream.getVideoTracks().forEach(track => track.enabled = isCamEnabled);
+            stream.getAudioTracks().forEach(track => track.enabled = isMicEnabled);
 
             setCameraStream(stream);
             setIsCameraLoading(false);
@@ -348,7 +371,7 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
                 else setSelectedAudioDevice(audioInputs[0].deviceId);
             }
 
-            console.log("Camera started successfully!");
+            console.log("Camera started successfully! Mic:", isMicEnabled, "Cam:", isCamEnabled);
         } catch (err: any) {
             console.error("Error accessing media devices:", err);
 
@@ -433,8 +456,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             audioTracks.forEach(track => {
                 track.enabled = !isMicEnabled;
             });
-            setIsMicEnabled(!isMicEnabled);
         }
+        setIsMicEnabled(!isMicEnabled);
     };
 
     const toggleCam = () => {
@@ -443,8 +466,8 @@ export default function LobbySelection({ onJoin, roomId, roomName }: LobbySelect
             videoTracks.forEach(track => {
                 track.enabled = !isCamEnabled;
             });
-            setIsCamEnabled(!isCamEnabled);
         }
+        setIsCamEnabled(!isCamEnabled);
     };
 
     // Handle settings toggle - start/stop camera

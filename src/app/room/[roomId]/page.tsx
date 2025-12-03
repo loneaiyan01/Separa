@@ -26,8 +26,8 @@ export default function RoomPage() {
     const [showLobby, setShowLobby] = useState(true);
     const [userGender, setUserGender] = useState<Gender>('male');
     const [isHost, setIsHost] = useState(false);
-    const [initialMicOn, setInitialMicOn] = useState(true);
-    const [initialCamOn, setInitialCamOn] = useState(true);
+    const [initialMicOn, setInitialMicOn] = useState(false);
+    const [initialCamOn, setInitialCamOn] = useState(false);
 
     useEffect(() => {
         const fetchRoomData = async () => {
@@ -96,14 +96,14 @@ export default function RoomPage() {
             setToken(roomToken);
             setUserGender(gender);
             setIsHost(isHostRole);
-            setInitialMicOn(initialMic ?? true);
-            setInitialCamOn(initialCam ?? true);
+            setInitialMicOn(initialMic ?? false);
+            setInitialCamOn(initialCam ?? false);
             setShowLobby(false);
 
             // Update URL to reflect state (as requested)
             const url = new URL(window.location.href);
-            url.searchParams.set('video', String(initialCam ?? true));
-            url.searchParams.set('audio', String(initialMic ?? true));
+            url.searchParams.set('video', String(initialCam ?? false));
+            url.searchParams.set('audio', String(initialMic ?? false));
             window.history.replaceState({}, '', url.toString());
         } catch (err) {
             console.error('Error joining room:', err);
@@ -127,6 +127,8 @@ export default function RoomPage() {
                 isHost={isHost}
                 onLeave={handleLeave}
                 roomName={roomData?.name || ''}
+                roomId={roomId}
+                initialTemplate={roomData?.template || 'open'}
                 initialMicOn={initialMicOn}
                 initialCamOn={initialCamOn}
             />

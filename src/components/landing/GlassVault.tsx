@@ -155,6 +155,19 @@ export default function GlassVault() {
                     <Lock className={`w-3 h-3 ${roomId.length > 0 || isCreateMode ? "text-cyan-400" : "text-slate-600"}`} />
                     <span>Protected by End-to-End Encryption</span>
                 </div>
+
+                {/* History Link */}
+                <div className="mt-4 flex justify-center">
+                    <button
+                        onClick={() => router.push('/rooms')}
+                        className="text-xs text-slate-500 hover:text-cyan-400 transition-colors flex items-center gap-1.5 group"
+                    >
+                        <svg className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        View Room History
+                    </button>
+                </div>
             </div>
         </motion.div>
     );
